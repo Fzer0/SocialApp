@@ -2,7 +2,8 @@
 
 A new Flutter project.
 
-## Getting Started
+## Getting Started<img width="636" height="887" alt="activity" src="https://github.com/user-attachments/assets/18f341dc-1896-46fc-a61d-b93e8302a4cf" />
+
 
 This project is a starting point for a Flutter application.
 
