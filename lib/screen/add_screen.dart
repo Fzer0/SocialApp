@@ -10,22 +10,27 @@ class AddScreen extends StatefulWidget {
   State<AddScreen> createState() => _AddScreenState();
 }
 
-int _currentIndex = 0;
+// === CORRECCIÓN: ELIMINAR ESTA VARIABLE GLOBAL ===
+// int _currentIndex = 0; 
+// =================================================
 
 class _AddScreenState extends State<AddScreen> {
+  // === CORRECCIÓN: DECLARAR LA VARIABLE DE ESTADO LOCALMENTE ===
+  int _currentIndex = 0; 
+  // =============================================================
+  
   late PageController pageController;
+  
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     pageController = PageController();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    super.dispose();
     pageController.dispose();
+    super.dispose();
   }
 
   onPageChanged(int page) {
@@ -38,6 +43,7 @@ class _AddScreenState extends State<AddScreen> {
     pageController.jumpToPage(page);
   }
 
+  @override // Agrega el @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -53,6 +59,7 @@ class _AddScreenState extends State<AddScreen> {
                 AddReelsScreen(),
               ],
             ),
+            // ... (El resto del código de la barra de navegación no necesita cambios)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               bottom: 10.h,
@@ -76,8 +83,7 @@ class _AddScreenState extends State<AddScreen> {
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
-                          color:
-                              _currentIndex == 0 ? Colors.white : Colors.grey,
+                          color: _currentIndex == 0 ? Colors.white : Colors.grey,
                         ),
                       ),
                     ),
@@ -90,8 +96,7 @@ class _AddScreenState extends State<AddScreen> {
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
-                          color:
-                              _currentIndex == 1 ? Colors.white : Colors.grey,
+                          color: _currentIndex == 1 ? Colors.white : Colors.grey,
                         ),
                       ),
                     ),
