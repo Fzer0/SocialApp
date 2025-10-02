@@ -2,7 +2,7 @@
 
 Aplicacion de una red social en flutter
 
-## 📸 Avance Semana 1 - Estructura Básica
+## 📸 Avance Semana 1 
 
 ![login](https://github.com/user-attachments/assets/f507cbfd-febe-4540-8128-c0f9736074e0)  ![singup](https://github.com/user-attachments/assets/51b2ddfa-302d-448d-a87d-ebca414802ff)
 
