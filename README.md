@@ -1,8 +1,11 @@
 # app
 
-A new Flutter project.
+Aplicacion de una red social en flutter
 
-## Getting Started<img width="636" height="887" alt="activity" src="https://github.com/user-attachments/assets/18f341dc-1896-46fc-a61d-b93e8302a4cf" />
+## 📸 Avance Semana 1 - Estructura Básica
+
+![login](https://github.com/user-attachments/assets/f507cbfd-febe-4540-8128-c0f9736074e0)
+![singup](https://github.com/user-attachments/assets/51b2ddfa-302d-448d-a87d-ebca414802ff)
 
 
 This project is a starting point for a Flutter application.
