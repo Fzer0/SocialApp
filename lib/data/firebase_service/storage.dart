@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 class StorageMetod {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  
   Future<String> uploadImageToStorage(String name, File file) async {
     // Verificar que el usuario actual no sea nulo antes de continuar
     if (_auth.currentUser == null) {

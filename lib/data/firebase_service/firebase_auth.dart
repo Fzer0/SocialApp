@@ -38,7 +38,7 @@ class Authentication {
           // upload image to firebase storage
 
           if (profile.path.isNotEmpty) {
-            URL = await StorageMetod().uploadImageToStorage('Profile', profile);
+            URL = await StorageMetod().uploadImageToStorage('profile', profile);
           } else {
             URL = '';
           }

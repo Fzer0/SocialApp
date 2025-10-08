@@ -16,7 +16,7 @@ class MainPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData) {
-            // Muestra NavigationScreen si el usuario está conectado
+            // Muestra la pantalla de navegación si el usuario está conectado
             return const NavigationScreen(); 
           } else {
             // Muestra la pantalla de autenticación si no está conectado

@@ -1,27 +1,14 @@
 import 'dart:io';
-import 'dart:typed_data'; // Importar Uint8List
+import 'dart:typed_data'; 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-// --------------------------------------------------------------------------
-// PANTALLA DE DESTINO (AddPostTextScreen)
-// --------------------------------------------------------------------------
-class AddPostTextScreen extends StatelessWidget {
-  final File file;
+// ✅ IMPORTANTE: Se añade el import de la pantalla funcional
+import 'package:app/screen/addpost_text.dart'; 
 
-  const AddPostTextScreen(this.file, {super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Next Screen')),
-      body: Center(
-        child: Text('File path: ${file.path}'),
-      ),
-    );
-  }
-}
+// 🛑 SE ELIMINA LA CLASE TEMPORAL 'AddPostTextScreen' DE ESTE ARCHIVO
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -34,20 +21,18 @@ class _AddPostScreenState extends State<AddPostScreen> {
   // Variables de estado y paginación
   List<AssetEntity> _assets = [];
   AssetEntity? _selectedAsset;
-  AssetPathEntity? _recentAlbum; // Álbum principal (All Photos/Recientes)
-  int _currentPage = 0; // Página actual cargada
-  bool _isLoading = false; // Bandera para evitar llamadas múltiples
-  final int _pageSize = 20; // Tamaño de página más pequeño para rapidez
-  bool _hasMore = true; // Indica si quedan más fotos por cargar
+  AssetPathEntity? _recentAlbum;
+  int _currentPage = 0;
+  bool _isLoading = false;
+  final int _pageSize = 20;
+  bool _hasMore = true;
   
-  // Controlador de Scroll para detectar el final de la lista
   final ScrollController _scrollController = ScrollController(); 
 
   @override
   void initState() {
     super.initState();
     _fetchAssets();
-    // Listener para la carga infinita
     _scrollController.addListener(_scrollListener); 
   }
 
@@ -57,28 +42,23 @@ class _AddPostScreenState extends State<AddPostScreen> {
     super.dispose();
   }
 
-  // Listener que se dispara al hacer scroll
   void _scrollListener() {
-    // Si no quedan más fotos o ya está cargando, salir.
     if (!_hasMore || _isLoading) return;
 
-    // Detecta si el usuario está cerca del final (90% del scroll).
     if (_scrollController.position.pixels >= 
         _scrollController.position.maxScrollExtent * 0.9) {
       _fetchAssets(isLoadMore: true);
     }
   }
 
-  // Función de Carga Paginada y Robusta
   Future<void> _fetchAssets({bool isLoadMore = false}) async {
-    if (_isLoading) return; // Si ya está cargando, ignora
+    if (_isLoading) return;
 
     setState(() {
       _isLoading = true;
     });
 
     if (!isLoadMore) {
-      // --- Lógica de Carga Inicial (Permisos y Álbum) ---
       final PermissionState ps = await PhotoManager.requestPermissionExtend();
       if (!ps.isAuth) {
           if (mounted) {
@@ -90,7 +70,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
           return;
       }
       
-      // Obtener la lista de álbumes (solo imágenes)
       final List<AssetPathEntity> albums =
           await PhotoManager.getAssetPathList(type: RequestType.image);
       
@@ -104,7 +83,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
           return;
       }
       
-      // 🐛 CORRECCIÓN: Seleccionar el álbum "All" o el primero como respaldo
       AssetPathEntity targetAlbum = albums.firstWhere(
         (album) => album.isAll,
         orElse: () => albums[0],
@@ -116,20 +94,18 @@ class _AddPostScreenState extends State<AddPostScreen> {
       _hasMore = true;
     }
 
-    // --- Lógica de Carga de Página ---
     if (_recentAlbum != null && _hasMore) {
       final List<AssetEntity> media =
           await _recentAlbum!.getAssetListPaged(page: _currentPage, size: _pageSize);
 
       if (media.isEmpty) {
-        // Se llegó al final de la galería
         _hasMore = false;
       } else {
         setState(() {
           _assets.addAll(media);
           _currentPage++;
           if (_selectedAsset == null) {
-            _selectedAsset = _assets.first; // Seleccionar la primera foto al inicio
+            _selectedAsset = _assets.first; 
           }
         });
       }
@@ -142,11 +118,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
 
   Future<void> _navigateToNextScreen() async {
     if (_selectedAsset != null) {
-      // Obtener el archivo completo solo al momento de navegar
       final File? file = await _selectedAsset!.file; 
       if (file != null) {
         Navigator.of(context).push(
           MaterialPageRoute(
+            // ✅ Ahora usa la AddPostTextScreen funcional importada
             builder: (context) => AddPostTextScreen(file),
           ),
         );
@@ -154,10 +130,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
-  // Widget para mostrar una miniatura de la imagen de la galería
   Widget _buildAssetThumbnail(AssetEntity asset) {
-    return FutureBuilder<Uint8List?>( // Especifica el tipo de retorno (Uint8List?)
-      // Carga la miniatura de 200x200 para la galería (rápido)
+    return FutureBuilder<Uint8List?>(
       future: asset.thumbnailDataWithSize(const ThumbnailSize(200, 200)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
@@ -200,23 +174,20 @@ class _AddPostScreenState extends State<AddPostScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          // Asigna el ScrollController para carga infinita
           controller: _scrollController, 
           child: Column(
             children: [
-              // 1. Sección de la imagen seleccionada (usa thumbnail de alta resolución)
+              // 1. Sección de la imagen seleccionada (Vista previa)
               SizedBox(
                 height: 375.h,
                 child: _selectedAsset == null
                     ? const Center(child: CircularProgressIndicator())
-                    // Muestra un indicador si la lista aún está vacía, sino el FutureBuilder
                     : _assets.isEmpty && _isLoading 
                         ? const Center(child: CircularProgressIndicator())
                         : FutureBuilder<Uint8List?>(
-                            // Carga la imagen principal usando una miniatura de alta resolución (rápida)
                             future: _selectedAsset!.thumbnailDataWithSize(
-    ThumbnailSize(MediaQuery.of(context).size.width.toInt(), 375.h.toInt()), 
-),
+                                ThumbnailSize(MediaQuery.of(context).size.width.toInt(), 375.h.toInt()), 
+                            ),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.done &&
                                   snapshot.data != null) {
@@ -229,7 +200,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                             },
                           ),
               ),
-              // 2. Separador y título de la galería (sin cambios)
+              // 2. Separador
               Container(
                 width: double.infinity,
                 height: 40.h,
@@ -246,7 +217,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
               // 3. Galería de imágenes con GridView.builder
               GridView.builder(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(), // Deshabilita el scroll del GridView
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: _assets.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
@@ -265,7 +236,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   );
                 },
               ),
-              // 4. Indicador de Carga: Muestra un spinner si se están cargando más fotos
+              // 4. Indicador de Carga
               if (_isLoading && _hasMore)
                 const Padding(
                   padding: EdgeInsets.all(16.0),

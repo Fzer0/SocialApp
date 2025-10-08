@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:app/data/firebase_service/firebase_auth.dart'; // Importar la clase de autenticación
+import 'package:app/data/firebase_service/firebase_auth.dart';
 import 'package:app/util/exeption.dart';
-import 'package:app/util/dialog.dart'; // Importar el dialog
+import 'package:app/util/dialog.dart'; 
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback show;

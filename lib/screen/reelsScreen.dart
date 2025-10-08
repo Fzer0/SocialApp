@@ -1,5 +1,3 @@
-// En el archivo: social_app/screen/reelsScreen.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 

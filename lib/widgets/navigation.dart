@@ -1,7 +1,5 @@
-// En el archivo: social_app/widgets/navigation.dart (o donde lo tengas)
-
 import 'package:flutter/material.dart';
-import 'package:app/screen/add_screen.dart'; // Importa AddScreen
+import 'package:app/screen/add_screen.dart'; 
 import 'package:app/screen/home.dart';
 import 'package:app/screen/profile_screen.dart';
 import 'package:app/screen/reelsScreen.dart';
@@ -52,7 +50,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
             icon: Icon(Icons.home),
             label: '',
           ),
-          // Ahora el ícono de la cámara navega a la pantalla de añadir
           BottomNavigationBarItem(
             icon: Icon(Icons.add_a_photo), 
             label: '',
@@ -68,7 +65,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         onPageChanged: onPageChanged,
         children: const [
           HomeScreen(),
-          AddScreen(), // Muestra la pantalla de añadir
+          AddScreen(), 
           ProfileScreen(),
         ],
       ),

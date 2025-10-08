@@ -69,8 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final passwordConfirme = TextEditingController();
   FocusNode passwordConfirme_F = FocusNode();
 
-  // 1. Declarar la variable _imageFile aquí, en el estado.
-  // Es importante que esté fuera de la función build para que persista.
+  // 1. Define una variable de estado para la imagen
   File? _imageFile;
 
   @override
@@ -87,12 +86,10 @@ class _SignupScreenState extends State<SignupScreen> {
                 onTap: () async {
                   // 2. Usar la variable de estado para guardar la imagen.
                   File? pickedImage = await ImagePickerr().uploadImage('gallery');
-                  if (pickedImage != null) {
-                    setState(() {
-                      _imageFile = pickedImage;
-                    });
-                  }
-                },
+                  setState(() {
+                    _imageFile = pickedImage;
+                  });
+                                },
                 child: CircleAvatar(
                   radius: 36.r,
                   backgroundColor: Colors.grey,
@@ -124,7 +121,7 @@ class _SignupScreenState extends State<SignupScreen> {
               SizedBox(height: 15.h),
               Textfild(passwordConfirme, passwordConfirme_F, 'PasswordConfirme', Icons.lock),
               SizedBox(height: 20.h),
-              Signup(), // Usar el widget Signup correcto
+              Signup(), 
               SizedBox(height: 15.h),
               Have()
             ],
@@ -141,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
-            "Don't you have an account?  ", // Corrección de la gramática
+            "Don't you have an account?  ", 
             style: TextStyle(
               fontSize: 14.sp,
               color: Colors.grey,
@@ -174,8 +171,8 @@ class _SignupScreenState extends State<SignupScreen> {
               passwordConfirme: passwordConfirme.text,
               username: username.text,
               bio: bio.text,
-              // 3. Pasar _imageFile, que ahora es una variable de estado
-              profile: _imageFile ?? File(''),// No necesita el operador ?? File('')
+              // 3. Pasar la imagen seleccionada al método Signup
+              profile: _imageFile ?? File(''),
             );
           } on exceptions catch (e) {
             dialogBuilder(context, e.massage);

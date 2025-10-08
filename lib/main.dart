@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:app/auth/mainpage.dart';
-import 'package:app/screen/home.dart'; // Importa el paquete de Firebase Core
+import 'package:app/screen/home.dart';
 
-void main() async { // La función main debe ser asíncrona
-  WidgetsFlutterBinding.ensureInitialized(); // Asegura la inicialización del framework
-  await Firebase.initializeApp(); // Inicializa Firebase 
+void main() async { 
+  WidgetsFlutterBinding.ensureInitialized(); 
+  await Firebase.initializeApp(); // Inicializa Firebase
   runApp(const MyApp());
 }
 
