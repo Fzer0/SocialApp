@@ -18,11 +18,11 @@ Aplicacion de una red social en flutter
            style="width:100%; max-width: 350px;">
     </td>
      </td>
-    <td width="50%" align="center">
+    <td colspan="2" align="center">
       <h3>Pantalla Principal (Mainpage)</h3>
       <img src="https://github.com/user-attachments/assets/0466f0cb-2e92-4583-ac20-0f731fba1094" 
            alt="Captura de la pantalla de Inicio" 
-           style="width:100%; max-width: 350px;">
+           style="width:100%; max-width: 600px;">
     </td>
   </tr>
 </table>
