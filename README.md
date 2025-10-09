@@ -2,7 +2,7 @@
 
 Aplicacion de una red social en flutter
 
-## 📸 Avance Semana 1 
+## 📸 Avances 
 <table width="100%">
   <tr>
     <td width="50%" align="center">
@@ -17,9 +17,17 @@ Aplicacion de una red social en flutter
            alt="Captura de la pantalla de Registro" 
            style="width:100%; max-width: 350px;">
     </td>
+     </td>
+    <td width="50%" align="center">
+      <h3>Pantalla Principal (Mainpage)</h3>
+      <img src="https://github.com/user-attachments/assets/0466f0cb-2e92-4583-ac20-0f731fba1094" 
+           alt="Captura de la pantalla de Inicio" 
+           style="width:100%; max-width: 350px;">
+    </td>
   </tr>
 </table>
 
+![WhatsApp Image 2025-10-08 at 9 29 30 PM](https://github.com/user-attachments/assets/0466f0cb-2e92-4583-ac20-0f731fba1094)
 
 
 This project is a starting point for a Flutter application.
