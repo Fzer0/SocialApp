@@ -24,7 +24,7 @@ Aplicacion de una red social en flutter
       <h3>Menú Principal</h3>
       <img src="https://github.com/user-attachments/assets/0466f0cb-2e92-4583-ac20-0f731fba1094" 
            alt="Captura del Menú Principal" 
-           style="width:100%; max-width: 600px;"> 
+           style="width:100%; max-width: 350px;"> 
     </td>
   </tr>
 </table>
