@@ -27,7 +27,6 @@ Aplicacion de una red social en flutter
   </tr>
 </table>
 
-![WhatsApp Image 2025-10-08 at 9 29 30 PM](https://github.com/user-attachments/assets/0466f0cb-2e92-4583-ac20-0f731fba1094)
 
 
 This project is a starting point for a Flutter application.
