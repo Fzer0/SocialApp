@@ -3,12 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photo_manager/photo_manager.dart';
-
-// ✅ IMPORTANTE: Se añade el import de la pantalla funcional
 import 'package:app/screen/addpost_text.dart'; 
 
-
-// 🛑 SE ELIMINA LA CLASE TEMPORAL 'AddPostTextScreen' DE ESTE ARCHIVO
 
 class AddPostScreen extends StatefulWidget {
   const AddPostScreen({super.key});
@@ -18,7 +14,6 @@ class AddPostScreen extends StatefulWidget {
 }
 
 class _AddPostScreenState extends State<AddPostScreen> {
-  // Variables de estado y paginación
   List<AssetEntity> _assets = [];
   AssetEntity? _selectedAsset;
   AssetPathEntity? _recentAlbum;
@@ -122,7 +117,6 @@ class _AddPostScreenState extends State<AddPostScreen> {
       if (file != null) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            // ✅ Ahora usa la AddPostTextScreen funcional importada
             builder: (context) => AddPostTextScreen(file),
           ),
         );

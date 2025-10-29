@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:app/screen/add_screen.dart'; 
 import 'package:app/screen/home.dart';
 import 'package:app/screen/profile_screen.dart';
-import 'package:app/screen/reelsScreen.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});

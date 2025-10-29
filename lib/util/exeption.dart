@@ -1,4 +1,4 @@
 class exceptions{
-  String massage;
-  exceptions(this.massage);
+  String message;
+  exceptions(this.message);
 }

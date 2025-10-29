@@ -10,14 +10,8 @@ class AddScreen extends StatefulWidget {
   State<AddScreen> createState() => _AddScreenState();
 }
 
-// === CORRECCIÓN: ELIMINAR ESTA VARIABLE GLOBAL ===
-// int _currentIndex = 0; 
-// =================================================
-
 class _AddScreenState extends State<AddScreen> {
-  // === CORRECCIÓN: DECLARAR LA VARIABLE DE ESTADO LOCALMENTE ===
   int _currentIndex = 0; 
-  // =============================================================
   
   late PageController pageController;
   
@@ -43,7 +37,7 @@ class _AddScreenState extends State<AddScreen> {
     pageController.jumpToPage(page);
   }
 
-  @override // Agrega el @override
+  @override 
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -59,7 +53,6 @@ class _AddScreenState extends State<AddScreen> {
                 AddReelsScreen(),
               ],
             ),
-            // ... (El resto del código de la barra de navegación no necesita cambios)
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               bottom: 10.h,
