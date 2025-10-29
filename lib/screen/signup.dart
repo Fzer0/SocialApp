@@ -68,21 +68,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(height: 20.h),
                 // Header minimalista
                 Text(
-                  'Únete',
+                  'Mingle',
                   style: TextStyle(
                     fontSize: 32.sp,
                     fontWeight: FontWeight.w800,
                     color: Colors.black87,
                     letterSpacing: -0.5,
-                  ),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  'Crea tu cuenta y conecta con otros',
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 SizedBox(height: 32.h),

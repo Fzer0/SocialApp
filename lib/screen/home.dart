@@ -7,6 +7,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/screen/profile_screen.dart';
 import 'package:app/data/firebase_service/firestor.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:app/screen/addpost_text.dart';
+import 'dart:io';
 
 import 'dart:async';
 
@@ -38,6 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
     _uploadSub?.cancel();
     super.dispose();
   }
+
+  Future<void> _openCamera() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      if (mounted) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddPostTextScreen(file)));
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         
         leading: IconButton(
-          onPressed: () {},
+          onPressed: _openCamera,
           icon: Image.asset('images/camera.jpg'),
         ),
         actions: [

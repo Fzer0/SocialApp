@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:app/data/firebase_service/firestor.dart';
 import 'package:app/data/model/usermodel.dart';
+import 'package:app/screen/edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   // Si no se pasa Uid, mostrará el perfil del usuario actual
@@ -306,8 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: GestureDetector(
                       onTap: () async {
                 if (isOwnProfile) {
-                  // Aqui podrías navegar a editar perfil
-                  print('Edit profile tapped');
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => EditProfileScreen(user: user)));
                 } else {
                   // Llamar a Firestore para follow/unfollow y refrescar vista
                   try {

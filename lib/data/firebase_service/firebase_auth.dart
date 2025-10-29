@@ -1,3 +1,5 @@
+// firebase_auth.dart
+
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/data/firebase_service/firestor.dart';
@@ -14,12 +16,10 @@ class Authentication {
     try {
       await _auth.signInWithEmailAndPassword(email: email.trim(), password: password.trim());
     } on FirebaseException catch (e) {
-      // Usando 'e.message' (campo renombrado en la excepción personalizada)
       throw exceptions(e.message.toString()); 
     }
   }
 
-  /// Enviar correo para restablecer contraseña.
   Future<void> ResetPassword({
     required String email,
   }) async {
@@ -38,43 +38,46 @@ class Authentication {
     required String bio,
     required File profile,
   }) async {
-    // Inicializar como cadena vacía para evitar problemas de null-safety
     String URL = '';
     try {
       if (email.isNotEmpty && password.isNotEmpty && username.isNotEmpty && bio.isNotEmpty) {
         if (password == passwordConfirme) {
-          await _auth.createUserWithEmailAndPassword(
+          
+          // 1. Crear el usuario (Auth)
+          final UserCredential cred = await _auth.createUserWithEmailAndPassword(
             email: email.trim(),
             password: password.trim(),
           );
 
-          // Asegurar que el currentUser está actualizado antes de subir la foto de perfil
-          try {
-            await _auth.currentUser?.reload();
-          } catch (e) {
-            // No bloquear el registro por un fallo de reload, solo loguearlo
-            print('Warning: failed to reload currentUser after signup: $e');
+          // OBTENER Y VERIFICAR EL UID INMEDIATAMENTE
+          final User? user = cred.user; // Usamos el UserCredential para mayor certeza.
+          if (user == null) {
+            throw exceptions('Registration successful but user object is null.');
           }
-          print('Signup - currentUser uid after create: ${_auth.currentUser?.uid}');
-
-          // Lógica correcta: si hay path, subir imagen.
+          final String uid = user.uid;
+          
+          // ⚠️ AÑADIR RETRASO ESTRATÉGICO PARA SINCRONIZACIÓN DE FIREBASE AUTH/STORAGE
+          await Future.delayed(const Duration(milliseconds: 500)); 
+          print('Signup - final UID before upload: $uid');
+          
+          // 2. Subir la imagen
           if (profile.path.isNotEmpty) {
-            // Intentar subir la imagen de perfil con un reintento si falla una vez.
-            URL = (await StorageMetod().uploadImageToStorage('profile', profile)) ?? '';
-            if (URL.isEmpty) {
-              print('Profile upload returned empty URL, retrying once...');
-              await Future.delayed(const Duration(seconds: 1));
-              URL = (await StorageMetod().uploadImageToStorage('profile', profile)) ?? '';
+             // DEBUG: Verificar el archivo antes de intentar subir
+            print('DEBUG: File exists: ${await profile.exists()} - File size: ${await profile.length()} bytes');
+            
+            if (await profile.exists() && await profile.length() > 0) {
+              URL = (await StorageMetod().uploadImageToStorage('profile', profile)) ?? ''; 
+            } else {
+              print('Warning: Profile file is empty or does not exist, skipping upload.');
             }
 
-            if (URL.isEmpty) {
-              // Si no se subió, lanzar excepción para informar al usuario.
+            if (URL.isEmpty && profile.path.isNotEmpty) {
+              // Si la subida fue intentada pero falló, lanzar excepción
               throw exceptions('No se pudo subir la foto de perfil. Intenta nuevamente.');
             }
-          } else {
-            URL = '';
           }
 
+          // 3. Crear el documento de usuario en Firestore
           await Firebase_Firestor().CreateUser(
             email: email,
             username: username,
@@ -90,7 +93,6 @@ class Authentication {
         throw exceptions('enter all the fields');
       }
     } on FirebaseException catch (e) {
-      // Usando 'e.message' (campo renombrado en la excepción personalizada)
       throw exceptions(e.message.toString()); 
     }
   }

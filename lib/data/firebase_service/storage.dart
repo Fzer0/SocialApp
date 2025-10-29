@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
-import 'package:path/path.dart' as p; // Necesitas este paquete: flutter pub add path
+import 'package:path/path.dart' as p; 
 
 class StorageMetod {
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -20,27 +20,35 @@ class StorageMetod {
       return null;
     }
     
+    // ⚠️ NUEVA VERIFICACIÓN DE ARCHIVO: Asegura que el File tiene contenido.
+    try {
+      if (!await file.exists() || await file.length() == 0) {
+        print('❌ Error: El archivo ${file.path} no existe o está vacío (0 bytes). Abortando subida.');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error al verificar el archivo antes de subir: $e');
+      return null;
+    }
+    // ***************************************
+
     String fileId = const Uuid().v4();
     Reference ref = _storage.ref()
         .child(folderName) 
         .child(currentUser.uid) 
         .child(fileId); 
-  // Debug: mostrar UID del usuario actual y ruta destino
-  print('🔎 Storage upload debug - currentUser.uid: ${currentUser.uid}');
-  print('🔎 Storage upload debug - destination path: ${folderName}/${currentUser.uid}/$fileId');
     
-    // CORRECCIÓN CLAVE: Determinar la extensión y crear metadatos explícitos.
+    print('🔎 Storage upload debug - currentUser.uid: ${currentUser.uid}');
+    print('🔎 Storage upload debug - destination path: ${folderName}/${currentUser.uid}/$fileId');
+    
     String extension = p.extension(file.path).toLowerCase().replaceFirst('.', '');
     
     final SettableMetadata metadata = SettableMetadata(
-      // Forzar un Content-Type válido para evitar NullPointerException en Android.
       contentType: 'image/$extension', 
     );
     
-    // Inicializar la tarea con los metadatos.
     UploadTask uploadTask = ref.putFile(file, metadata); 
 
-    // Lógica de reintento: Mantenida y ligeramente ajustada para la estabilidad.
     const int timeoutSeconds = 120;
     int attempts = 0;
     const int maxAttempts = 2;
@@ -50,7 +58,6 @@ class StorageMetod {
       attempts++;
       try {
         snapshot = await uploadTask.timeout(const Duration(seconds: timeoutSeconds));
-        // Si no hay timeout, la subida fue exitosa.
         break; 
       } on TimeoutException catch (e) {
         print('❌ Upload timeout on attempt $attempts: $e');
@@ -59,26 +66,18 @@ class StorageMetod {
           print('❌ Max upload attempts reached, aborting upload.');
           return null;
         }
-
-        // Re-crear uploadTask para reintentar la subida
         try {
-          // Se cancela la tarea anterior para liberar recursos y evitar conflictos.
           await uploadTask.cancel(); 
-          
-          // Se crea una nueva tarea de subida con el mismo archivo y metadatos.
           uploadTask = ref.putFile(file, metadata); 
           print('🔁 Retrying upload (attempt ${attempts + 1})...');
         } catch (err) {
           print('⚠️ Failed to re-create upload task for retry: $err');
-          // Si falló el reintento, salimos.
           return null; 
         }
       } on FirebaseException catch (e) {
-        // Capturar errores de Firebase (PERMISSION_DENIED, etc.)
         print('❌ ERROR FIREBASE STORAGE (${e.code}): ${e.message}');
         return null;
       } catch (e) {
-        // Capturar otros errores generales
         print('❌ Error inesperado durante la subida: $e');
         return null;
       }
