@@ -15,7 +15,7 @@ void main() async {
       );
       // Log de verificación para depuración
       // Ver en la consola: "Firebase initialized"
-      print('Firebase initialized');
+      // print('Firebase initialized');
     }
     // Activar App Check en modo debug (desarrollo). Esto evitará 403 si App Check
     // está en enforcement en la consola y estás probando desde un dispositivo.
@@ -24,14 +24,14 @@ void main() async {
         androidProvider: AndroidProvider.debug,
         appleProvider: AppleProvider.debug,
       );
-      print('Firebase App Check activated (debug provider)');
+      // print('Firebase App Check activated (debug provider)');
     } catch (e) {
-      print('FirebaseAppCheck activation failed: $e');
+      // print('FirebaseAppCheck activation failed: $e');
     }
   } catch (e, st) {
     // Mostrar en consola cualquier error durante la inicialización
-    print('Firebase initialization error: $e');
-    print(st);
+    // print('Firebase initialization error: $e');
+    // print(st);
   }
   runApp(const MyApp());
 }

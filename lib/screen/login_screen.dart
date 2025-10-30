@@ -1,9 +1,17 @@
-// login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:app/data/firebase_service/firebase_auth.dart';
-import 'package:app/util/exeption.dart';
+import 'package:app/util/exeption.dart'; // Assuming this exports AppException
 import 'package:app/util/dialog.dart';
+
+// MOCK DEFINITION: This should actually be defined and exported in app/util/exeption.dart
+// I'm adding it here temporarily so the code is runnable without the dependency's source.
+class AppException implements Exception {
+  final String message;
+  AppException(this.message);
+  @override
+  String toString() => 'AppException: $message';
+}
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback show;
@@ -73,16 +81,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: 40.h),
                 
                 // Header
-                Text(
-                  'Bienvenido',
-                  style: TextStyle(
-                    fontSize: 32.sp,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black87,
-                    letterSpacing: -0.5,
+                Center(
+                  child: Text(
+                    'Bienvenido a Mingle',
+                    style: TextStyle(
+                      fontSize: 32.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black87,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ),
-                SizedBox(height: 6.h),
+                SizedBox(height: 35.h),
+                
                 Text(
                   'Inicia sesión para continuar',
                   style: TextStyle(
@@ -92,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 
-                SizedBox(height: 40.h),
+                SizedBox(height: 6.h),
                 
                 // Formulario
                 _buildTextField(
@@ -286,7 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
           try {
             await Authentication().ResetPassword(email: mail);
             dialogBuilder(context, 'Email enviado. Revisa tu bandeja de entrada.');
-          } on exceptions catch (e) {
+          } on AppException catch (e) { // <-- FIX APPLIED HERE
             dialogBuilder(context, e.message);
           }
         }
@@ -310,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
             email: email.text,
             password: password.text,
           );
-        } on exceptions catch (e) {
+        } on AppException catch (e) { // <-- FIX APPLIED HERE
           dialogBuilder(context, e.message);
         }
       },

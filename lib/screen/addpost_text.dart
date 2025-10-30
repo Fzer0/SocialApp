@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart'; 
 import 'package:path_provider/path_provider.dart'; 
-
 import 'package:app/data/firebase_service/storage.dart';
 import 'package:app/util/upload_bus.dart';
 import 'package:app/data/firebase_service/firestor.dart';
@@ -54,7 +53,6 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
       final File finalFile = File(compressedXFile.path); 
       
     // 3. Subir el archivo COMPRIMIDO a Storage
-    // uploadImageToStorage puede devolver String? — usar ?? '' para garantizar String no nulo
     String post_url = (await StorageMetod()
       .uploadImageToStorage('posts', finalFile)) ?? '';
           
@@ -67,13 +65,11 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
         }
         return;
       }
-
-      // Si la subida fue exitosa, crear documento en Firestore para que la imagen
-      // se liste permanentemente en el feed, además de notificar al UploadBus.
+      // 5. Crear el documento en Firestore
       bool created = false;
       Object? creationError;
       try {
-        created = await Firebase_Firestor().CreatePost(
+        created = await FirebaseFirestor().CreatePost(
           postImage: post_url,
           caption: caption.text.trim(),
           location: location.text.trim(),
@@ -121,7 +117,7 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
                     Navigator.of(ctx).pop();
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reintentando crear post...')));
                     try {
-                      final retried = await Firebase_Firestor().CreatePost(
+                      final retried = await FirebaseFirestor().CreatePost(
                         postImage: post_url,
                         caption: caption.text.trim(),
                         location: location.text.trim(),
@@ -176,7 +172,7 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
               padding: EdgeInsets.symmetric(horizontal: 10.w),
               child: GestureDetector(
                 onTap: isLoading ? null : _sharePost,
-                child: Text('Share',
+                child: Text('Compartir',
                   style: TextStyle(
                     color: isLoading ? Colors.grey : Colors.blue, 
                     fontSize: 15.sp,
@@ -222,7 +218,7 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
                                 child: TextField(
                                   controller: caption,
                                   decoration: const InputDecoration(
-                                    hintText: 'Write a caption ...',
+                                    hintText: 'Escribe un pie de foto...',
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.zero,
                                   ),
@@ -241,7 +237,7 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
                           child: TextField(
                             controller: location,
                             decoration: const InputDecoration(
-                              hintText: 'Add location',
+                              hintText: 'Añadir comentario',
                               border: InputBorder.none,
                             ),
                           ),

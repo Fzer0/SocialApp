@@ -61,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (viewUid == _auth.currentUser?.uid) {
       try {
         // Firebase_Firestor().getUser() devuelve el Usermodel del usuario actual
-        final user = await Firebase_Firestor().getUser();
+        final user = await FirebaseFirestor().getUser();
         return user;
       } catch (e) {
         // Si falla, caemos al fetch directo
@@ -113,7 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final viewUid = widget.Uid ?? _auth.currentUser?.uid;
 
     return DefaultTabController(
-      length: 3,
+      // 1. CAMBIO AQUÍ: La longitud de pestañas es ahora 1
+      length: 1,
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
         body: SafeArea(
@@ -305,7 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 13.w),
             child: GestureDetector(
-                      onTap: () async {
+              onTap: () async {
                 if (isOwnProfile) {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => EditProfileScreen(user: user)));
                 } else {
@@ -314,9 +315,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     final viewUid = widget.Uid ?? _auth.currentUser?.uid;
                     if (viewUid == null) return;
                     if (follow) {
-                      await Firebase_Firestor().unfollowUser(targetUid: viewUid);
+                      await FirebaseFirestor().unfollowUser(targetUid: viewUid);
                     } else {
-                      await Firebase_Firestor().followUser(targetUid: viewUid);
+                      await FirebaseFirestor().followUser(targetUid: viewUid);
                     }
                     // actualizar estado local y recargar user model
                     await _checkIfFollowing();
@@ -339,7 +340,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   border: Border.all(color: isOwnProfile ? Colors.grey.shade400 : Colors.blue),
                 ),
                 child: isOwnProfile
-                    ? const Text('Edit Your Profile')
+                    ? const Text('Editar tu perfil',
+                        style: TextStyle(color: Colors.black),
+                      )
                     : Text(
                         follow ? 'Following' : 'Follow',
                         style: TextStyle(color: follow ? Colors.black : Colors.white),
@@ -357,9 +360,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               labelColor: Colors.black,
               indicatorColor: Colors.black,
               tabs: [
-                Icon(Icons.grid_on),
-                Icon(Icons.video_collection),
-                Icon(Icons.person),
+                // 2. CAMBIO AQUÍ: Se eliminaron los iconos de video y persona.
+                Icon(Icons.grid_on), 
               ],
             ),
           ),

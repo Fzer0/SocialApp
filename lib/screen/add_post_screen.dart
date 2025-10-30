@@ -203,7 +203,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.w),
                   child: Text(
-                    'Recent',
+                    'Recientes',
                     style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
                   ),
                 ),

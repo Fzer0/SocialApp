@@ -67,18 +67,6 @@ class _SignupScreenState extends State<SignupScreen> {
               children: [
                 SizedBox(height: 20.h),
                 // Header minimalista
-                Text(
-                  'Mingle',
-                  style: TextStyle(
-                    fontSize: 32.sp,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black87,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                SizedBox(height: 32.h),
-                
-                // Avatar con diseño más moderno
                 Center(
                   child: Stack(
                     children: [
@@ -283,7 +271,7 @@ class _SignupScreenState extends State<SignupScreen> {
           dialogBuilder(context, "¡Registro exitoso! Ya puedes iniciar sesión.");
           widget.show();
 
-        } on exceptions catch (e) {
+        } on Exceptions catch (e) {
           dialogBuilder(context, e.message);
         }
       },
