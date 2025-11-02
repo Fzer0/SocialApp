@@ -4,8 +4,6 @@ import 'package:app/data/firebase_service/firebase_auth.dart';
 import 'package:app/util/exeption.dart'; // Assuming this exports AppException
 import 'package:app/util/dialog.dart';
 
-// MOCK DEFINITION: This should actually be defined and exported in app/util/exeption.dart
-// I'm adding it here temporarily so the code is runnable without the dependency's source.
 class AppException implements Exception {
   final String message;
   AppException(this.message);
@@ -79,8 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 
                 SizedBox(height: 40.h),
-                
-                // Header
                 Center(
                   child: Text(
                     'Bienvenido a Mingle',
@@ -104,8 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 
                 SizedBox(height: 6.h),
-                
-                // Formulario
+
                 _buildTextField(
                   controller: email,
                   focusNode: email_F,
@@ -124,26 +119,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 
                 SizedBox(height: 12.h),
-                
-                // Forgot password
                 Align(
                   alignment: Alignment.centerRight,
                   child: _buildForgotPassword(),
                 ),
                 
                 SizedBox(height: 32.h),
-                
-                // Login button
                 _buildLoginButton(),
                 
                 SizedBox(height: 24.h),
-                
-                // Divider con texto
                 _buildDivider(),
                 
                 SizedBox(height: 24.h),
-                
-                // Signup link
                 _buildSignupLink(),
               ],
             ),
@@ -321,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
             email: email.text,
             password: password.text,
           );
-        } on AppException catch (e) { // <-- FIX APPLIED HERE
+        } on AppException catch (e) { 
           dialogBuilder(context, e.message);
         }
       },

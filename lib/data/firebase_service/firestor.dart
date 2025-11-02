@@ -1,11 +1,8 @@
 import 'package:app/data/model/usermodel.dart';
-// import 'package:app/util/exeption.dart'; // Eliminado para evitar conflictos de importación
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
-// Definición de una clase de excepción personalizada para reemplazar la función 'exceptions'
-// Esto asegura que la clase sea self-contained y resuelve el error de compilación.
 class AppException implements Exception {
   final String message;
   AppException(this.message);
@@ -14,14 +11,12 @@ class AppException implements Exception {
 }
 
 class FirebaseFirestor {
-  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance; // Fix: The instance method was not called correctly.
+  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Like or unlike a post (toggle)
   Future<void> toggleLike({required String postId}) async {
     try {
       final uid = _auth.currentUser?.uid;
-      // Reemplazando 'exceptions' por 'AppException'
       if (uid == null) throw AppException('User not authenticated'); 
       final docRef = _firebaseFirestore.collection('posts').doc(postId);
       final snap = await docRef.get();
@@ -39,12 +34,9 @@ class FirebaseFirestor {
       rethrow;
     }
   }
-
-  // Follow a user
   Future<void> followUser({required String targetUid}) async {
     try {
       final uid = _auth.currentUser?.uid;
-      // Reemplazando 'exceptions' por 'AppException'
       if (uid == null) throw AppException('User not authenticated');
       if (uid == targetUid) return;
       final targetRef = _firebaseFirestore.collection('users').doc(targetUid);
@@ -62,7 +54,6 @@ class FirebaseFirestor {
   Future<void> unfollowUser({required String targetUid}) async {
     try {
       final uid = _auth.currentUser?.uid;
-      // Reemplazando 'exceptions' por 'AppException'
       if (uid == null) throw AppException('User not authenticated');
       if (uid == targetUid) return;
       final targetRef = _firebaseFirestore.collection('users').doc(targetUid);
@@ -83,7 +74,6 @@ class FirebaseFirestor {
     required String profile,
   }) async {
     final uid = _auth.currentUser?.uid;
-    // Reemplazando 'exceptions' por 'AppException'
     if (uid == null) throw AppException('User not authenticated');
     await _firebaseFirestore.collection('users').doc(uid).set({
       'email': email,
@@ -97,13 +87,10 @@ class FirebaseFirestor {
   }
   Future<Usermodel> getUser() async {
   try {
-    // Usar la colección 'users' (plural) para ser coherente con CreateUser
     final uid = _auth.currentUser?.uid;
-    // Reemplazando 'exceptions' por 'AppException'
     if (uid == null) throw AppException('User not authenticated');
     final user = await _firebaseFirestore.collection('users').doc(uid).get();
     final snapuser = user.data();
-    // Reemplazando 'exceptions' por 'AppException'
     if (snapuser == null) throw AppException('User document not found');
     return Usermodel(
       email: snapuser['email'],
@@ -114,7 +101,6 @@ class FirebaseFirestor {
       following: snapuser['following'],
     );
   } on FirebaseException catch (e) {
-    // Reemplazando 'exceptions' por 'AppException'
     throw AppException(e.message.toString());
   }
 }
@@ -130,8 +116,6 @@ class FirebaseFirestor {
       try {
         user = await getUser();
       } catch (e) {
-        // Si no existe el documento de usuario, no queremos fallar la subida del post.
-        // Usar valores por defecto basados en el usuario autenticado cuando sea posible.
         print('Warning: could not fetch user document, using fallback values: $e');
         final authUser = _auth.currentUser;
         user = Usermodel(
@@ -167,7 +151,6 @@ class FirebaseFirestor {
     }
   }
 
-  // Obtener Usermodel por uid (para ver perfiles de otros)
   Future<Usermodel> getUserById(String uid) async {
     try {
       final doc = await _firebaseFirestore.collection('users').doc(uid).get();
@@ -182,12 +165,10 @@ class FirebaseFirestor {
         following: (data['following'] ?? []) as List,
       );
     } on FirebaseException catch (e) {
-      // Reemplazando 'exceptions' por 'AppException'
       throw AppException(e.message.toString());
     }
   }
 
-  // Nuevo método para crear un "Reel" o "Story"
   Future<void> CreateReel({
     required String videoUrl,
     required String caption,
@@ -199,7 +180,6 @@ class FirebaseFirestor {
     DateTime timestamp = DateTime.now();
 
     try {
-      // Obtener datos del usuario para el post
       Usermodel user = await getUser();
 
       final payload = {
@@ -211,10 +191,9 @@ class FirebaseFirestor {
         'postId': postId,
         'time': timestamp,
         'likes': [],
-        'views': 0, // Añadir contador de vistas
+        'views': 0,
       };
 
-      // Guardar en una colección separada para stories/reels
       await _firebaseFirestore.collection('stories').doc(postId).set(payload);
       print('✅ Firestore CreateReel succeeded: doc=stories/$postId');
     } on FirebaseException catch (e) {
@@ -226,7 +205,6 @@ class FirebaseFirestor {
     }
   }
 
-  // Nuevo método para agregar un comentario a un post
   Future<void> addComment({
     required String postId,
     required String comment,
@@ -234,9 +212,7 @@ class FirebaseFirestor {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw AppException('User not authenticated');
 
-    // Obtener el username desde Firestore para consistencia
     final user = await getUser();
-
     await _firebaseFirestore.collection('posts').doc(postId).collection('comments').add({
       'comment': comment,
       'username': user.username,
@@ -246,7 +222,6 @@ class FirebaseFirestor {
     print('Firestore addComment succeeded: postId=$postId uid=$uid');
   }
 
-  // Método para obtener comentarios de un post
   Stream<QuerySnapshot> getComments(String postId) {
     return _firebaseFirestore
         .collection('posts')
@@ -256,7 +231,6 @@ class FirebaseFirestor {
         .snapshots();
   }
 
-  // Nuevo método para actualizar un comentario
   Future<void> updateComment({
     required String postId,
     required String commentId,
@@ -277,7 +251,6 @@ class FirebaseFirestor {
     print('Firestore updateComment succeeded: postId=$postId commentId=$commentId uid=$uid');
   }
 
-  // Nuevo método para eliminar un comentario
   Future<void> deleteComment({
     required String postId,
     required String commentId,
@@ -294,7 +267,6 @@ class FirebaseFirestor {
     print('Firestore deleteComment succeeded: postId=$postId commentId=$commentId uid=$uid');
   }
 
-  // Nuevo método para eliminar un post
   Future<void> deletePost({
     required String postId,
   }) async {

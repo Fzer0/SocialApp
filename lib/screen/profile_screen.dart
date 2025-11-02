@@ -8,7 +8,6 @@ import 'package:app/data/model/usermodel.dart';
 import 'package:app/screen/edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  // Si no se pasa Uid, mostrará el perfil del usuario actual
   final String? Uid;
   const ProfileScreen({super.key, this.Uid});
 
@@ -21,7 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   int post_lenght = 0;
   bool isOwnProfile = false;
-  bool follow = false; // estado local si no tienes función de follow en tu Firestore class
+  bool follow = false;
   late Future<Usermodel> _userFuture;
 
   @override
@@ -32,7 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     isOwnProfile = (viewUid != null && viewUid == currentUid);
     _userFuture = _fetchUserModel();
     _checkIfFollowing();
-    // No hacemos llamadas largas aquí; el FutureBuilder cargará el user y StreamBuilder las posts
   }
 
   Future<void> _checkIfFollowing() async {
@@ -56,20 +54,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (viewUid == null) {
       throw Exception('No user id available');
     }
-
-    // Si pedimos el perfil propio, intentamos usar la función que ya tienes
     if (viewUid == _auth.currentUser?.uid) {
       try {
-        // Firebase_Firestor().getUser() devuelve el Usermodel del usuario actual
         final user = await FirebaseFirestor().getUser();
         return user;
       } catch (e) {
-        // Si falla, caemos al fetch directo
         print('Firebase_Firestor.getUser() failed: $e');
       }
     }
-
-    // Lectura directa desde Firestore: intentamos 'users' (creado por CreateUser)
     try {
       final doc = await _firebaseFirestore.collection('users').doc(viewUid).get();
       final data = doc.data();
@@ -86,8 +78,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       print('read users collection failed: $e');
     }
-
-    // Fallback a colección 'user' por compatibilidad si existe
     try {
       final doc = await _firebaseFirestore.collection('user').doc(viewUid).get();
       final data = doc.data();
@@ -113,7 +103,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final viewUid = widget.Uid ?? _auth.currentUser?.uid;
 
     return DefaultTabController(
-      // 1. CAMBIO AQUÍ: La longitud de pestañas es ahora 1
       length: 1,
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
@@ -134,8 +123,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                 ),
               ),
-
-              // Grid de posts del usuario
               StreamBuilder<QuerySnapshot>(
                 stream: _firebaseFirestore
                     .collection('posts')
@@ -153,7 +140,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       final snap = snapshot.data!.docs[index];
                       return GestureDetector(
                         onTap: () {
-                          // Mostrar imagen en un dialog simple (no hay PostScreen disponible)
                           showDialog(
                               context: context,
                               builder: (_) => Dialog(
@@ -193,8 +179,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
-  // ignore: non_constant_identifier_names
   Widget Head(Usermodel user) {
     return Container(
       color: Colors.white,
@@ -310,7 +294,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (isOwnProfile) {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => EditProfileScreen(user: user)));
                 } else {
-                  // Llamar a Firestore para follow/unfollow y refrescar vista
                   try {
                     final viewUid = widget.Uid ?? _auth.currentUser?.uid;
                     if (viewUid == null) return;
@@ -319,7 +302,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     } else {
                       await FirebaseFirestor().followUser(targetUid: viewUid);
                     }
-                    // actualizar estado local y recargar user model
                     await _checkIfFollowing();
                     setState(() {
                       _userFuture = _fetchUserModel();
@@ -360,7 +342,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               labelColor: Colors.black,
               indicatorColor: Colors.black,
               tabs: [
-                // 2. CAMBIO AQUÍ: Se eliminaron los iconos de video y persona.
                 Icon(Icons.grid_on), 
               ],
             ),

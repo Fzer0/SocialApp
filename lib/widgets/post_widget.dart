@@ -7,7 +7,7 @@ class PostWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // Alinea todo a la izquierda
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Encabezado de la publicación
         SizedBox(
@@ -26,7 +26,7 @@ class PostWidget extends StatelessWidget {
                 'username',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  fontWeight: FontWeight.bold, // Negrita para el nombre de usuario
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               subtitle: Text(
@@ -43,7 +43,6 @@ class PostWidget extends StatelessWidget {
           height: 375.h,
           child: Image.asset('images/post.jpg', fit: BoxFit.cover),
         ),
-        // Fila de iconos y acciones
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
           child: Row(
@@ -66,7 +65,6 @@ class PostWidget extends StatelessWidget {
             ],
           ),
         ),
-        // Conteo de "me gusta"
         Padding(
           padding: EdgeInsets.only(left: 19.w, bottom: 5.h),
           child: Text(
@@ -77,13 +75,12 @@ class PostWidget extends StatelessWidget {
             ),
           ),
         ),
-        // Descripción de la publicación
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 15.w),
           child: Row(
             children: [
               Text(
-                'username' + ', ', // Agregué el espacio
+                'username' + ', ', 
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
@@ -98,7 +95,6 @@ class PostWidget extends StatelessWidget {
             ],
           ),
         ),
-        // Formato de fecha
         Padding(
           padding: EdgeInsets.only(left: 15.w, top: 20.h, bottom: 8.h),
           child: Text(

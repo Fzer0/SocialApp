@@ -1,9 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Generated file — replace the placeholder values with your Firebase project configuration
-/// Prefer generating this file with the FlutterFire CLI (`flutterfire configure`) to get
-/// the real values for each platform.
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) return web;

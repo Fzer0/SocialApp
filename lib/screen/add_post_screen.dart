@@ -171,7 +171,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
           controller: _scrollController, 
           child: Column(
             children: [
-              // 1. Sección de la imagen seleccionada (Vista previa)
+              // 1. Sección de la imagen seleccionada
               SizedBox(
                 height: 375.h,
                 child: _selectedAsset == null
@@ -208,7 +208,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   ),
                 ),
               ),
-              // 3. Galería de imágenes con GridView.builder
+              // 3. Galería de imágenes
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

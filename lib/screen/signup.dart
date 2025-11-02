@@ -1,4 +1,3 @@
-// signup.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -66,7 +65,6 @@ class _SignupScreenState extends State<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 20.h),
-                // Header minimalista
                 Center(
                   child: Stack(
                     children: [
@@ -138,8 +136,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 
                 SizedBox(height: 36.h),
-                
-                // Formulario
                 _buildTextField(
                   controller: username,
                   focusNode: username_F,
@@ -147,7 +143,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   icon: Icons.alternate_email,
                 ),
                 SizedBox(height: 16.h),
-                
                 _buildTextField(
                   controller: email,
                   focusNode: email_F,
@@ -155,7 +150,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   icon: Icons.mail_outline,
                 ),
                 SizedBox(height: 16.h),
-                
                 _buildTextField(
                   controller: bio,
                   focusNode: bio_F,
@@ -163,7 +157,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   icon: Icons.edit_note,
                 ),
                 SizedBox(height: 16.h),
-                
                 _buildTextField(
                   controller: password,
                   focusNode: password_F,
@@ -172,7 +165,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   isPassword: true,
                 ),
                 SizedBox(height: 16.h),
-                
                 _buildTextField(
                   controller: passwordConfirme,
                   focusNode: passwordConfirme_F,
@@ -182,13 +174,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 
                 SizedBox(height: 32.h),
-                
-                // Botón de registro
                 _buildSignupButton(),
                 
                 SizedBox(height: 24.h),
-                
-                // Link a login
                 _buildLoginLink(),
               ],
             ),

@@ -56,7 +56,7 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
     String post_url = (await StorageMetod()
       .uploadImageToStorage('posts', finalFile)) ?? '';
           
-      // 4. Solo guardar la imagen en Storage: si no tenemos URL, avisar error
+      // 4. guardar la imagen en Storage: si no tenemos URL, avisar error
       if (post_url.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -85,7 +85,7 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Post publicado')),
           );
-          // Notificar a cualquier oyente (ej. Home) que hay una nueva imagen
+          // Notificar que hay una nueva imagen
           try {
             UploadBus.controller.add(post_url);
           } catch (e) {
@@ -205,7 +205,6 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.amber,
                                 image: DecorationImage(
-                                  // El widget sigue mostrando el archivo original (widget.file)
                                   image: FileImage(widget.file), 
                                   fit: BoxFit.cover,
                                 ),

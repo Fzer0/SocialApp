@@ -27,10 +27,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Suscribirse al bus de uploads para actualizar la UI cuando llegue una nueva URL
     _uploadSub = UploadBus.controller.stream.listen((url) {
       setState(() {
-        // insertar al inicio para mostrar primero las más recientes
         _uploadedImages.insert(0, url);
       });
     });
@@ -72,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context, scrollController) {
             return Column(
               children: [
-                // Header
                 Container(
                   padding: EdgeInsets.all(16.w),
                   decoration: const BoxDecoration(
@@ -93,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                // Comments list
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestor().getComments(postId),
@@ -130,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Avatar placeholder
                                 ClipOval(
                                   child: SizedBox(
                                     width: 32.w,
@@ -188,7 +183,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                // Comment input
                 Container(
                   padding: EdgeInsets.only(
                     left: 16.w,
@@ -405,7 +399,6 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: Image.asset('images/camera.jpg'),
         ),
         actions: [
-          // **Se eliminaron los botones de 'bug_report' y 'send.jpg'**
           IconButton(
             tooltip: 'Logout',
             icon: const Icon(Icons.logout, color: Colors.black),
@@ -418,7 +411,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          // Horizontal list of users
           SliverToBoxAdapter(
             child: SizedBox(
               height: 100.h,
@@ -464,7 +456,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Mostrar imágenes subidas recientemente
           if (_uploadedImages.isNotEmpty)
             SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
@@ -485,8 +476,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }, childCount: _uploadedImages.length),
             ),
-
-          // Lista de posts desde Firestore
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance.collection('posts').orderBy('time', descending: true).snapshots(),
             builder: (context, snapshot) {
@@ -529,7 +518,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Encabezado simple
                           ListTile(
                             leading: ClipOval(
                               child: SizedBox(
@@ -561,7 +549,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   )
                                 : const Icon(Icons.more_horiz),
                           ),
-                          // Imagen del post
                           SizedBox(
                             width: double.infinity,
                             height: 300.h,
@@ -577,7 +564,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                           ),
-                          // Actions row (like, comment, share)
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8.w),
                             child: Row(
@@ -622,8 +608,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-
-                          // Caption
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
                             child: Row(
