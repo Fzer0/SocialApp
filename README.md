@@ -2,33 +2,18 @@
 
 Aplicacion de una red social en flutter
 
-## 📸 Avances 
-<table width="100%">
-  <tr>
-    <td width="50%" align="center">
-      <h3>Pantalla de Login</h3>
-      <img src="https://github.com/user-attachments/assets/ec5fdf71-6c46-4d2f-b91c-32f34aff599a" 
-           alt="Captura de la pantalla de Login" 
-           style="width:100%; max-width: 350px;">
-    </td>
-    <td width="50%" align="center">
-      <h3>Pantalla de Registro (Signup)</h3>
-      <img src="https://github.com/user-attachments/assets/954aa24a-403d-4509-8f24-52f576a15c8a" 
-           alt="Captura de la pantalla de Registro" 
-           style="width:100%; max-width: 350px;">
-    </td>
-  </tr>
-  
-  <tr>
-    <td width="50%" align="center">
-      <h3>Menú Principal</h3>
-      <img src="https://github.com/user-attachments/assets/0466f0cb-2e92-4583-ac20-0f731fba1094" 
-           alt="Captura del Menú Principal" 
-           style="width:100%; max-width: 350px;"> 
-    </td>
-  </tr>
-</table>
+## 📸 Mingle
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c51ba76d-b4c3-4853-ae1c-966eafb968dc" width="200" alt="Descripción de la Imagen 1"/>
+  <img src="https://github.com/user-attachments/assets/2c85c539-ade1-41db-b4eb-da4f0b60ea51" width="200" alt="Descripción de la Imagen 2"/>
+  <img src="https://github.com/user-attachments/assets/099b8e21-56ce-41d1-ad5c-d657f964b783" width="200" alt="Descripción de la Imagen 3"/>
+</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f4a912a0-fa12-4064-bc0b-b68962797d6b" width="200" alt="Descripción de la Imagen 4"/>
+  <img src="https://github.com/user-attachments/assets/382419f2-0b67-4938-b343-85e274c99b01" width="200" alt="Descripción de la Imagen 5"/>
+  <img src="https://github.com/user-attachments/assets/2c263301-17cd-4888-a8dd-f16725787661" width="200" alt="Descripción de la Imagen 6"/>
+</p>
 
 
 This project is a starting point for a Flutter application.
