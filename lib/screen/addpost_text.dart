@@ -1,11 +1,12 @@
 import 'dart:io';
-import 'package:flutter_image_compress/flutter_image_compress.dart'; 
-import 'package:path_provider/path_provider.dart'; 
+
+import 'package:app/data/firebase_service/firestor.dart';
 import 'package:app/data/firebase_service/storage.dart';
 import 'package:app/util/upload_bus.dart';
-import 'package:app/data/firebase_service/firestor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 
 class AddPostTextScreen extends StatefulWidget {
   final File file;
@@ -16,9 +17,9 @@ class AddPostTextScreen extends StatefulWidget {
 }
 
 class _AddPostTextScreenState extends State<AddPostTextScreen> {
-  final caption = TextEditingController();
-  final location = TextEditingController();
-  bool isLoading = false; 
+  final TextEditingController caption = TextEditingController();
+  final TextEditingController location = TextEditingController();
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -27,224 +28,264 @@ class _AddPostTextScreenState extends State<AddPostTextScreen> {
     super.dispose();
   }
 
-  void _sharePost() async {
-    if (isLoading) return; 
+  Future<void> _sharePost() async {
+    if (isLoading) return;
 
     setState(() {
       isLoading = true;
     });
 
     try {
-      // 1. Obtener la ruta temporal
       final dir = await getTemporaryDirectory();
-      final targetPath = "${dir.path}/compressed_image_${DateTime.now().millisecondsSinceEpoch}.jpg";
+      final targetPath =
+          '${dir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      // 2. Realizar la compresión
-      final XFile? compressedXFile = await FlutterImageCompress.compressAndGetFile(
-        widget.file.absolute.path, 
-        targetPath, 
+      final XFile? compressedXFile =
+          await FlutterImageCompress.compressAndGetFile(
+        widget.file.absolute.path,
+        targetPath,
         quality: 85,
         format: CompressFormat.jpeg,
       );
 
       if (compressedXFile == null) {
-        throw Exception("Fallo al comprimir la imagen.");
+        throw Exception('Fallo al comprimir la imagen');
       }
-      final File finalFile = File(compressedXFile.path); 
-      
-    // 3. Subir el archivo COMPRIMIDO a Storage
-    String post_url = (await StorageMetod()
-      .uploadImageToStorage('posts', finalFile)) ?? '';
-          
-      // 4. guardar la imagen en Storage: si no tenemos URL, avisar error
-      if (post_url.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Fallo al subir la imagen.')), 
-          );
-        }
+
+      final File finalFile = File(compressedXFile.path);
+
+      final String postUrl =
+          await StorageMetod().uploadImageToStorage('posts', finalFile) ?? '';
+
+      if (postUrl.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Fallo al subir la imagen')),
+        );
         return;
       }
-      // 5. Crear el documento en Firestore
+
       bool created = false;
-      Object? creationError;
+
       try {
         created = await FirebaseFirestor().CreatePost(
-          postImage: post_url,
+          postImage: postUrl,
           caption: caption.text.trim(),
           location: location.text.trim(),
         );
       } catch (e) {
-        creationError = e;
-        print('Error creating post document: $e');
         created = false;
       }
 
-      if (mounted) {
-        if (created) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Post publicado')),
-          );
-          // Notificar que hay una nueva imagen
-          try {
-            UploadBus.controller.add(post_url);
-          } catch (e) {
-            print('UploadBus add failed: $e');
-          }
-          // Devolver la URL al screen anterior
-          Navigator.of(context).pop(post_url);
-        } else {
-          // Si no se creó el documento en Firestore, mostrar diálogo con opción a reintentar.
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Subida completada, pero falla al crear el post'),
-              content: Text('La imagen se subió a Storage, pero no se pudo crear el documento en Firestore.\nError: ${creationError ?? 'desconocido'}'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                    // Notificar al usuario y cerrar el screen
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Imagen subida: $post_url')),
-                    );
-                    Navigator.of(context).pop(post_url);
-                  },
-                  child: const Text('Ignorar'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(ctx).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reintentando crear post...')));
-                    try {
-                      final retried = await FirebaseFirestor().CreatePost(
-                        postImage: post_url,
-                        caption: caption.text.trim(),
-                        location: location.text.trim(),
-                      );
-                      if (retried) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Post publicado')));
-                        try { UploadBus.controller.add(post_url); } catch (e) { print('UploadBus add failed: $e'); }
-                        Navigator.of(context).pop(post_url);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No se pudo crear el post')));
-                      }
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error creando post: $e')));
-                    }
-                  },
-                  child: const Text('Reintentar'),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+
+      if (created) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Fallo al publicar: ${e.toString()}')),
+          const SnackBar(content: Text('Post publicado')),
+        );
+
+        try {
+          UploadBus.controller.add(postUrl);
+        } catch (_) {}
+
+        Navigator.of(context).pop(postUrl);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo crear el post')),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Fallo al publicar: $e')),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
+
+  Widget _buildInput({
+    required TextEditingController controller,
+    required String hint,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: Colors.white.withOpacity(0.35),
+        ),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.05),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 14.h,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: BorderSide(
+            color: Colors.white.withOpacity(0.08),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: const BorderSide(
+            color: Color(0xFF6E76FF),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF070B1F),
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF070B1F),
         elevation: 0,
-        title: const Text('New post',
-          style: TextStyle(color: Colors.black),
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        title: Text(
+          'New Post',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        centerTitle: false,
         actions: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              child: GestureDetector(
-                onTap: isLoading ? null : _sharePost,
-                child: Text('Compartir',
-                  style: TextStyle(
-                    color: isLoading ? Colors.grey : Colors.blue, 
-                    fontSize: 15.sp,
-                  ),
-                ),
-              ),
+          Padding(
+            padding: EdgeInsets.only(right: 10.w),
+            child: TextButton(
+              onPressed: isLoading ? null : _sharePost,
+              child: isLoading
+                  ? SizedBox(
+                      width: 18.w,
+                      height: 18.h,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      'Publicar',
+                      style: TextStyle(
+                        color: const Color(0xFF7B8CFF),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
             ),
           ),
         ],
       ),
-      body: SafeArea(
-          child: isLoading 
-              ? const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.black,
-                  ))
-              : SingleChildScrollView(
-                  padding: EdgeInsets.only(top: 10.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10.w, vertical: 5.h),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 65.w,
-                              height: 65.h,
-                              decoration: BoxDecoration(
-                                color: Colors.amber,
-                                image: DecorationImage(
-                                  image: FileImage(widget.file), 
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            Expanded( 
-                              child: SizedBox(
-                                height: 60.h,
-                                child: TextField(
-                                  controller: caption,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Escribe un pie de foto...',
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                  maxLines: null,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Divider(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        child: SizedBox(
-                          height: 30.h,
-                          child: TextField(
-                            controller: location,
-                            decoration: const InputDecoration(
-                              hintText: 'Añadir comentario',
-                              border: InputBorder.none,
-                            ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+        child: Container(
+          padding: EdgeInsets.all(18.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF12172C),
+            borderRadius: BorderRadius.circular(28.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.06),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.22),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(22.r),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 300.h,
+                  child: Image.file(
+                    widget.file,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SizedBox(height: 18.h),
+              Text(
+                'Descripción',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.88),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              _buildInput(
+                controller: caption,
+                hint: 'Escribe un pie de foto...',
+                maxLines: 4,
+              ),
+              SizedBox(height: 18.h),
+              Text(
+                'Ubicación',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.88),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              _buildInput(
+                controller: location,
+                hint: 'Agrega una ubicación...',
+              ),
+              SizedBox(height: 24.h),
+              SizedBox(
+                width: double.infinity,
+                height: 50.h,
+                child: ElevatedButton(
+                  onPressed: isLoading ? null : _sharePost,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF6B63FF),
+                    disabledBackgroundColor:
+                        const Color(0xFF6B63FF).withOpacity(0.55),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18.r),
+                    ),
+                  ),
+                  child: isLoading
+                      ? SizedBox(
+                          width: 22.w,
+                          height: 22.h,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Publicar ahora',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                )),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

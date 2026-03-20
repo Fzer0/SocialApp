@@ -5,10 +5,19 @@ import 'package:app/data/firebase_service/firebase_auth.dart';
 import 'package:app/util/dialog.dart';
 import 'package:app/util/exeption.dart';
 import 'package:app/util/imagepicker.dart';
+import 'package:app/widgets/auth_shell.dart';
+import 'package:app/widgets/auth_input.dart';
+import 'package:app/widgets/auth_button.dart';
 
 class SignupScreen extends StatefulWidget {
-  final VoidCallback show;
-  SignupScreen(this.show, {super.key});
+  final VoidCallback showLogin;
+  final VoidCallback showWelcome;
+
+  const SignupScreen({
+    super.key,
+    required this.showLogin,
+    required this.showWelcome,
+  });
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -16,26 +25,64 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final email = TextEditingController();
-  FocusNode email_F = FocusNode();
   final password = TextEditingController();
-  FocusNode password_F = FocusNode();
   final bio = TextEditingController();
-  FocusNode bio_F = FocusNode();
   final username = TextEditingController();
-  FocusNode username_F = FocusNode();
   final passwordConfirme = TextEditingController();
-  FocusNode passwordConfirme_F = FocusNode();
 
   File? _imageFile;
+  bool _loading = false;
+  bool _obscure1 = true;
+  bool _obscure2 = true;
 
-  @override
-  void initState() {
-    super.initState();
-    email_F.addListener(() => setState(() {}));
-    password_F.addListener(() => setState(() {}));
-    bio_F.addListener(() => setState(() {}));
-    username_F.addListener(() => setState(() {}));
-    passwordConfirme_F.addListener(() => setState(() {}));
+  Future<void> _signup() async {
+    if (username.text.trim().isEmpty) {
+      dialogBuilder(context, 'Ingresa tu nombre de usuario');
+      return;
+    }
+
+    if (email.text.trim().isEmpty) {
+      dialogBuilder(context, 'Ingresa tu correo');
+      return;
+    }
+
+    if (password.text.trim().isEmpty) {
+      dialogBuilder(context, 'Ingresa tu contraseña');
+      return;
+    }
+
+    if (passwordConfirme.text.trim().isEmpty) {
+      dialogBuilder(context, 'Confirma tu contraseña');
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      await Authentication().Signup(
+        email: email.text,
+        password: password.text,
+        passwordConfirme: passwordConfirme.text,
+        username: username.text,
+        bio: bio.text,
+        profile: _imageFile ?? File(''),
+      );
+
+      if (mounted) {
+        dialogBuilder(context, '¡Registro exitoso! Ahora inicia sesión.');
+        widget.showLogin();
+      }
+    } on Exceptions catch (e) {
+      dialogBuilder(context, e.message);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -45,280 +92,114 @@ class _SignupScreenState extends State<SignupScreen> {
     bio.dispose();
     username.dispose();
     passwordConfirme.dispose();
-    email_F.dispose();
-    password_F.dispose();
-    bio_F.dispose();
-    username_F.dispose();
-    passwordConfirme_F.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFFAFAFA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 20.h),
-                Center(
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF667EEA),
-                              Color(0xFF764BA2),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        padding: EdgeInsets.all(3.w),
-                        child: CircleAvatar(
-                          radius: 50.r,
-                          backgroundColor: Color(0xFFFAFAFA),
-                          child: _imageFile == null
-                              ? Icon(
-                                  Icons.person_outline,
-                                  size: 40.w,
-                                  color: Colors.grey[400],
-                                )
-                              : ClipOval(
-                                  child: Image.file(
-                                    _imageFile!,
-                                    fit: BoxFit.cover,
-                                    width: 100.w,
-                                    height: 100.w,
-                                  ),
-                                ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () async {
-                            File? pickedImage = await ImagePickerr().uploadImage('gallery');
-                            setState(() {
-                              _imageFile = pickedImage;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(8.w),
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 18.w,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                SizedBox(height: 36.h),
-                _buildTextField(
-                  controller: username,
-                  focusNode: username_F,
-                  hint: 'Nombre de usuario',
-                  icon: Icons.alternate_email,
-                ),
-                SizedBox(height: 16.h),
-                _buildTextField(
-                  controller: email,
-                  focusNode: email_F,
-                  hint: 'Correo electrónico',
-                  icon: Icons.mail_outline,
-                ),
-                SizedBox(height: 16.h),
-                _buildTextField(
-                  controller: bio,
-                  focusNode: bio_F,
-                  hint: 'Bio (opcional)',
-                  icon: Icons.edit_note,
-                ),
-                SizedBox(height: 16.h),
-                _buildTextField(
-                  controller: password,
-                  focusNode: password_F,
-                  hint: 'Contraseña',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                ),
-                SizedBox(height: 16.h),
-                _buildTextField(
-                  controller: passwordConfirme,
-                  focusNode: passwordConfirme_F,
-                  hint: 'Confirmar contraseña',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                ),
-                
-                SizedBox(height: 32.h),
-                _buildSignupButton(),
-                
-                SizedBox(height: 24.h),
-                _buildLoginLink(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required String hint,
-    required IconData icon,
-    bool isPassword = false,
-  }) {
-    bool isFocused = focusNode.hasFocus;
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isFocused ? Colors.black87 : Colors.grey[300]!,
-          width: isFocused ? 2 : 1,
-        ),
-        boxShadow: isFocused
-            ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                )
-              ]
-            : [],
-      ),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        obscureText: isPassword,
-        style: TextStyle(
-          fontSize: 16.sp,
-          color: Colors.black87,
-          fontWeight: FontWeight.w500,
-        ),
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: TextStyle(
-            color: Colors.grey[400],
-            fontWeight: FontWeight.w400,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: isFocused ? Colors.black87 : Colors.grey[400],
-            size: 22.w,
-          ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 16.h,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSignupButton() {
-    return GestureDetector(
-      onTap: () async {
-        try {
-          await Authentication().Signup(
-            email: email.text,
-            password: password.text,
-            passwordConfirme: passwordConfirme.text,
-            username: username.text,
-            bio: bio.text,
-            profile: _imageFile ?? File(''),
-          );
-          
-          dialogBuilder(context, "¡Registro exitoso! Ya puedes iniciar sesión.");
-          widget.show();
-
-        } on Exceptions catch (e) {
-          dialogBuilder(context, e.message);
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        height: 54.h,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF667EEA),
-              Color(0xFF764BA2),
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFF667EEA).withOpacity(0.3),
-              blurRadius: 15,
-              offset: Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            'Crear cuenta',
-            style: TextStyle(
-              fontSize: 17.sp,
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoginLink() {
-    return Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return AuthShell(
+      child: Column(
         children: [
-          Text(
-            '¿Ya tienes cuenta? ',
-            style: TextStyle(
-              fontSize: 15.sp,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w400,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              onPressed: widget.showWelcome,
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
             ),
           ),
+          SizedBox(height: 10.h),
           GestureDetector(
-            onTap: widget.show,
+            onTap: () async {
+              File? pickedImage = await ImagePickerr().uploadImage('gallery');
+              if (pickedImage != null) {
+                setState(() {
+                  _imageFile = pickedImage;
+                });
+              }
+            },
+            child: CircleAvatar(
+              radius: 42.r,
+              backgroundColor: Colors.white.withOpacity(0.9),
+              backgroundImage: _imageFile != null ? FileImage(_imageFile!) : null,
+              child: _imageFile == null
+                  ? Icon(Icons.person_add_alt_1, color: Colors.grey.shade700, size: 34.sp)
+                  : null,
+            ),
+          ),
+          SizedBox(height: 14.h),
+          Text(
+            'Create New Account',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 26.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          AuthInput(
+            controller: username,
+            hint: 'Username',
+            icon: Icons.person_outline,
+          ),
+          AuthInput(
+            controller: email,
+            hint: 'Email address',
+            icon: Icons.mail_outline,
+            keyboardType: TextInputType.emailAddress,
+          ),
+          AuthInput(
+            controller: bio,
+            hint: 'Bio',
+            icon: Icons.edit_note,
+          ),
+          AuthInput(
+            controller: password,
+            hint: 'Password',
+            icon: Icons.lock_outline,
+            obscureText: _obscure1,
+            suffixIcon: IconButton(
+              onPressed: () {
+                setState(() {
+                  _obscure1 = !_obscure1;
+                });
+              },
+              icon: Icon(
+                _obscure1 ? Icons.visibility_off : Icons.visibility,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          AuthInput(
+            controller: passwordConfirme,
+            hint: 'Confirm Password',
+            icon: Icons.lock_outline,
+            obscureText: _obscure2,
+            suffixIcon: IconButton(
+              onPressed: () {
+                setState(() {
+                  _obscure2 = !_obscure2;
+                });
+              },
+              icon: Icon(
+                _obscure2 ? Icons.visibility_off : Icons.visibility,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          SizedBox(height: 8.h),
+          AuthButton(
+            text: 'Sign Up',
+            onTap: _signup,
+            loading: _loading,
+          ),
+          SizedBox(height: 10.h),
+          GestureDetector(
+            onTap: widget.showLogin,
             child: Text(
-              'Inicia sesión',
+              '¿Ya tienes cuenta? Log In',
               style: TextStyle(
-                fontSize: 15.sp,
-                color: Color(0xFF667EEA),
+                color: Colors.white,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
