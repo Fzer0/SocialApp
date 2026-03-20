@@ -16,4 +16,6 @@ class Usermodel {
     required this.followers,
     required this.following,
   });
+
+  get posts => null;
 }

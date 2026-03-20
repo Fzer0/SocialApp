@@ -1,12 +1,12 @@
 import 'package:app/data/firebase_service/firestor.dart';
 import 'package:app/data/model/usermodel.dart';
 import 'package:app/screen/edit_profile_screen.dart';
-import 'package:app/screen/settings_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:app/screen/settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? Uid;
@@ -20,93 +20,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  int postLenght = 0;
   bool isOwnProfile = false;
   bool follow = false;
   late Future<Usermodel> _userFuture;
 
-  String? get _viewUid => widget.Uid ?? _auth.currentUser?.uid;
-
   @override
   void initState() {
     super.initState();
-    _refreshProfileState();
-  }
-
-  @override
-  void didUpdateWidget(covariant ProfileScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.Uid != widget.Uid) {
-      _refreshProfileState();
-    }
-  }
-
-  void _refreshProfileState() {
     final currentUid = _auth.currentUser?.uid;
-    final viewUid = _viewUid;
-
-    isOwnProfile = (viewUid != null && currentUid != null && viewUid == currentUid);
+    final viewUid = widget.Uid ?? currentUid;
+    isOwnProfile = (viewUid != null && viewUid == currentUid);
     _userFuture = _fetchUserModel();
     _checkIfFollowing();
   }
 
   Future<void> _checkIfFollowing() async {
-    final viewUid = _viewUid;
+    final viewUid = widget.Uid ?? _auth.currentUser?.uid;
     final currentUid = _auth.currentUser?.uid;
-
-    if (viewUid == null || currentUid == null || viewUid == currentUid) {
-      if (!mounted) return;
-      setState(() {
-        follow = false;
-      });
-      return;
-    }
+    if (viewUid == null || currentUid == null) return;
 
     try {
-      final isFollowing = await FirebaseFirestor().isFollowingUser(viewUid);
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(viewUid).get();
+      final data = doc.data();
+      final followers = (data?['followers'] ?? []) as List;
+
       if (!mounted) return;
       setState(() {
-        follow = isFollowing;
+        follow = followers.contains(currentUid);
       });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        follow = false;
-      });
+    } catch (e) {
+      print('checkIfFollowing failed: $e');
     }
   }
 
   Future<Usermodel> _fetchUserModel() async {
-    final viewUid = _viewUid;
-    if (viewUid == null || viewUid.isEmpty) {
+    final viewUid = widget.Uid ?? _auth.currentUser?.uid;
+    if (viewUid == null) {
       throw Exception('No user id available');
     }
 
     if (viewUid == _auth.currentUser?.uid) {
-      return FirebaseFirestor().getUser();
+      try {
+        final user = await FirebaseFirestor().getUser();
+        return user;
+      } catch (e) {
+        print('FirebaseFirestor.getUser() failed: $e');
+      }
     }
 
-    return FirebaseFirestor().getUserById(viewUid);
-  }
-
-  void _showError(Object e) {
-    if (!mounted) return;
-
-    String message = 'Ocurrió un error';
-    final errorText = e.toString().toLowerCase();
-
-    if (errorText.contains('permission')) {
-      message = 'No tienes permisos para realizar esta acción';
-    } else if (errorText.contains('network')) {
-      message = 'Error de red. Revisa tu conexión';
-    } else if (errorText.contains('auth')) {
-      message = 'Debes iniciar sesión nuevamente';
-    } else if (errorText.contains('not found')) {
-      message = 'Usuario no encontrado';
+    try {
+      final doc = await _firebaseFirestore.collection('users').doc(viewUid).get();
+      final data = doc.data();
+      if (data != null) {
+        return Usermodel(
+          email: (data['email'] ?? '') as String,
+          username: (data['username'] ?? '') as String,
+          bio: (data['bio'] ?? '') as String,
+          profile: (data['profile'] ?? '') as String,
+          coverImage: (data['coverImage'] ?? '') as String,
+          followers: (data['followers'] ?? []) as List,
+          following: (data['following'] ?? []) as List,
+        );
+      }
+    } catch (e) {
+      print('read users collection failed: $e');
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    try {
+      final doc = await _firebaseFirestore.collection('user').doc(viewUid).get();
+      final data = doc.data();
+      if (data != null) {
+        return Usermodel(
+          email: (data['email'] ?? '') as String,
+          username: (data['username'] ?? '') as String,
+          bio: (data['bio'] ?? '') as String,
+          profile: (data['profile'] ?? '') as String,
+          coverImage: (data['coverImage'] ?? '') as String,
+          followers: (data['followers'] ?? []) as List,
+          following: (data['following'] ?? []) as List,
+        );
+      }
+    } catch (e) {
+      print('read user collection failed: $e');
+    }
+
+    throw Exception('User not found');
   }
 
   Future<void> _handleMainButton(Usermodel user) async {
@@ -116,18 +116,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (_) => EditProfileScreen(user: user),
         ),
       );
-
       if (!mounted) return;
       setState(() {
-        _refreshProfileState();
+        _userFuture = _fetchUserModel();
       });
       return;
     }
 
-    final viewUid = _viewUid;
-    if (viewUid == null || viewUid.isEmpty) return;
-
     try {
+      final viewUid = widget.Uid ?? _auth.currentUser?.uid;
+      if (viewUid == null) return;
+
       if (follow) {
         await FirebaseFirestor().unfollowUser(targetUid: viewUid);
       } else {
@@ -141,7 +140,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _userFuture = _fetchUserModel();
       });
     } catch (e) {
-      _showError(e);
+      print('Follow/unfollow failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
 
@@ -151,14 +154,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (_) => EditProfileScreen(user: user),
       ),
     );
-
     if (!mounted) return;
     setState(() {
-      _refreshProfileState();
+      _userFuture = _fetchUserModel();
     });
   }
 
-  void _showSettingsSheet(Usermodel user) {
+    void _showSettingsSheet(Usermodel user) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SettingsScreen(user: user),
@@ -205,8 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileTop(Usermodel user) {
-    final initials =
-        user.username.isNotEmpty ? user.username[0].toUpperCase() : 'U';
+    final initials = user.username.isNotEmpty ? user.username[0].toUpperCase() : 'U';
 
     return Container(
       width: double.infinity,
@@ -219,24 +220,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Container(
                 width: double.infinity,
-                height: 210.h,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF19114A),
-                      Color(0xFF070B1F),
-                    ],
-                  ),
-                ),
-                child: user.coverImage.isEmpty
-                    ? const SizedBox.shrink()
-                    : CachedNetworkImage(
-                        imageUrl: user.coverImage,
-                        fit: BoxFit.cover,
-                        errorWidget: (c, s, e) => const SizedBox.shrink(),
-                      ),
+                height: 120.h,
+                color: const Color(0xFF070B1F),
               ),
               Positioned(
                 top: 14.h,
@@ -424,11 +409,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Wrap(
                       spacing: 8.w,
                       runSpacing: 8.h,
-                      children: const [
-                        _ProfileTag(text: '#memes'),
-                        _ProfileTag(text: '#gatos'),
-                        _ProfileTag(text: '#nocturno'),
-                      ],
                     ),
                   ),
                 ],
@@ -440,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatsCard(Usermodel user, String? viewUid) {
+  Widget _buildStatsCard(Usermodel user) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -453,20 +433,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Row(
         children: [
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: viewUid == null
-                  ? null
-                  : _firebaseFirestore
-                      .collection('posts')
-                      .where('uid', isEqualTo: viewUid)
-                      .snapshots(),
-              builder: (context, snapshot) {
-                final postLength = snapshot.data?.docs.length ?? 0;
-                return _StatItem(
-                  value: postLength.toString(),
-                  label: 'Posts',
-                );
-              },
+            child: _StatItem(
+              value: postLenght.toString(),
+              label: 'Posts',
             ),
           ),
           Container(
@@ -496,86 +465,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTabSelector() {
-    return Container(
-      height: 52.h,
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFF141A31),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.08),
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Center(
-              child: Icon(
-                Icons.grid_view_rounded,
-                color: Colors.white.withOpacity(0.50),
-                size: 22.sp,
-              ),
-            ),
-          ),
-          Container(
-            width: 1,
-            height: double.infinity,
-            color: Colors.white.withOpacity(0.08),
-          ),
-          Expanded(
-            child: Center(
-              child: Icon(
-                Icons.favorite_border,
-                color: Colors.white.withOpacity(0.50),
-                size: 22.sp,
-              ),
-            ),
-          ),
-          Container(
-            width: 1,
-            height: double.infinity,
-            color: Colors.white.withOpacity(0.08),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.r),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF4E63FF),
-                    Color(0xFF6D7BFF),
-                  ],
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.bookmark_border,
-                  color: Colors.white,
-                  size: 22.sp,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildPostsGrid(String? viewUid) {
-    if (viewUid == null || viewUid.isEmpty) {
-      return const SliverToBoxAdapter(
-        child: SizedBox.shrink(),
-      );
-    }
-
     return StreamBuilder<QuerySnapshot>(
       stream: _firebaseFirestore
           .collection('posts')
           .where('uid', isEqualTo: viewUid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (!snapshot.hasData) {
           return const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.all(20),
@@ -584,24 +481,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         }
 
-        if (snapshot.hasError) {
-          return const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Center(
-                child: Text(
-                  'Error al cargar publicaciones',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ),
-            ),
-          );
-        }
-
-        final docs = snapshot.data?.docs ?? [];
+        final docs = snapshot.data!.docs;
+        postLenght = docs.length;
 
         if (docs.isEmpty) {
-          return const SliverToBoxAdapter(
+          return SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 40),
               child: Center(
@@ -622,13 +506,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final snap = docs[index];
-                final data = snap.data() as Map<String, dynamic>;
-                final imageUrl = (data['postImage'] ?? '') as String;
+                final imageUrl = snap['postImage'];
 
                 return GestureDetector(
                   onTap: () {
-                    if (imageUrl.isEmpty) return;
-
                     showDialog(
                       context: context,
                       builder: (_) => Dialog(
@@ -660,22 +541,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14.r),
-                    child: imageUrl.isEmpty
-                        ? Container(
-                            color: const Color(0xFF12172C),
-                            child: const Icon(Icons.error, color: Colors.white),
-                          )
-                        : CachedNetworkImage(
-                            imageUrl: imageUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (c, s) => Container(
-                              color: const Color(0xFF12172C),
-                            ),
-                            errorWidget: (c, s, e) => Container(
-                              color: const Color(0xFF12172C),
-                              child: const Icon(Icons.error, color: Colors.white),
-                            ),
-                          ),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (c, s) => Container(
+                        color: const Color(0xFF12172C),
+                      ),
+                      errorWidget: (c, s, e) => Container(
+                        color: const Color(0xFF12172C),
+                        child: const Icon(Icons.error, color: Colors.white),
+                      ),
+                    ),
                   ),
                 );
               },
@@ -695,7 +571,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final viewUid = _viewUid;
+    final viewUid = widget.Uid ?? _auth.currentUser?.uid;
 
     return Scaffold(
       backgroundColor: const Color(0xFF070B1F),
@@ -706,23 +582,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: FutureBuilder<Usermodel>(
                 future: _userFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (!snapshot.hasData) {
                     return SizedBox(
                       height: 300.h,
                       child: const Center(
                         child: CircularProgressIndicator(),
-                      ),
-                    );
-                  }
-
-                  if (snapshot.hasError || !snapshot.hasData) {
-                    return SizedBox(
-                      height: 300.h,
-                      child: const Center(
-                        child: Text(
-                          'No se pudo cargar el perfil',
-                          style: TextStyle(color: Colors.white70),
-                        ),
                       ),
                     );
                   }
@@ -733,9 +597,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       _buildProfileTop(user),
                       SizedBox(height: 4.h),
-                      _buildStatsCard(user, viewUid),
+                      _buildStatsCard(user),
                       SizedBox(height: 12.h),
-                      _buildTabSelector(),
                     ],
                   );
                 },

@@ -1,5 +1,4 @@
 import 'package:app/data/firebase_service/firestor.dart';
-import 'package:app/util/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -27,8 +26,10 @@ class _EditPostScreenState extends State<EditPostScreen> {
   @override
   void initState() {
     super.initState();
-    _captionController = TextEditingController(text: widget.initialCaption);
-    _locationController = TextEditingController(text: widget.initialLocation);
+    _captionController =
+        TextEditingController(text: widget.initialCaption);
+    _locationController =
+        TextEditingController(text: widget.initialLocation);
   }
 
   @override
@@ -41,21 +42,8 @@ class _EditPostScreenState extends State<EditPostScreen> {
   void _showError(Object e) {
     if (!mounted) return;
 
-    String message = 'Error al actualizar la publicación';
-    final errorText = e.toString().toLowerCase();
-
-    if (errorText.contains('permission')) {
-      message = 'No tienes permisos para editar esta publicación';
-    } else if (errorText.contains('not authenticated')) {
-      message = 'Debes iniciar sesión nuevamente';
-    } else if (errorText.contains('network')) {
-      message = 'Error de red. Revisa tu conexión';
-    } else if (errorText.contains('post not found')) {
-      message = 'La publicación no existe o fue eliminada';
-    }
-
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      const SnackBar(content: Text('Error al actualizar publicación')),
     );
   }
 
@@ -67,13 +55,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
     if (caption == widget.initialCaption.trim() &&
         location == widget.initialLocation.trim()) {
-      Navigator.of(context).pop();
+      Navigator.pop(context);
       return;
     }
 
-    setState(() {
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
     try {
       await FirebaseFirestor().updatePost(
@@ -84,60 +70,35 @@ class _EditPostScreenState extends State<EditPostScreen> {
 
       if (!mounted) return;
 
+      Navigator.pop(context, true);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Publicación actualizada')),
       );
-      Navigator.of(context).pop(true);
     } catch (e) {
       _showError(e);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
     }
+
+    setState(() => _loading = false);
   }
 
   InputDecoration _inputDecoration({
-    required String label,
     required String hint,
     IconData? icon,
   }) {
     return InputDecoration(
-      labelText: label,
       hintText: hint,
-      prefixIcon: icon != null
-          ? Icon(
-              icon,
-              color: AppColors.textSecondary,
-              size: 20.sp,
-            )
-          : null,
-      labelStyle: TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 13.sp,
-      ),
       hintStyle: TextStyle(
-        color: AppColors.textSecondary.withOpacity(0.7),
+        color: Colors.white.withOpacity(0.45),
         fontSize: 13.sp,
       ),
+      prefixIcon: icon != null
+          ? Icon(icon, color: Colors.white.withOpacity(0.6))
+          : null,
       filled: true,
-      fillColor: AppColors.inputFill,
-      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14.r),
-        borderSide: BorderSide(
-          color: AppColors.textSecondary.withOpacity(0.10),
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14.r),
-        borderSide: const BorderSide(
-          color: AppColors.primary,
-          width: 1.2,
-        ),
-      ),
+      fillColor: Colors.white.withOpacity(0.06),
+      contentPadding:
+          EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14.r),
         borderSide: BorderSide.none,
@@ -148,115 +109,125 @@ class _EditPostScreenState extends State<EditPostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Editar publicación',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+      backgroundColor: const Color(0xFF070B1F),
+
+      // 🔝 APPBAR estilo HOME
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(88.h),
+        child: SafeArea(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFF070B1F),
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.white.withOpacity(0.04),
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Editar',
+                  style: TextStyle(
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(18.w),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: AppColors.textSecondary.withOpacity(0.08),
+
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16.w),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(18.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFF12172C),
+            borderRadius: BorderRadius.circular(24.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.06),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.22),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.shadow,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Actualiza tu publicación',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.white.withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Actualiza los datos de tu publicación',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+              ),
+              SizedBox(height: 18.h),
+
+              // ✏️ CAPTION
+              TextField(
+                controller: _captionController,
+                maxLines: 5,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration(
+                  hint: 'Escribe una descripción...',
+                  icon: Icons.edit_outlined,
                 ),
-                SizedBox(height: 18.h),
-                TextField(
-                  controller: _captionController,
-                  maxLines: 5,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
-                  ),
-                  decoration: _inputDecoration(
-                    label: 'Descripción',
-                    hint: 'Escribe una descripción para tu publicación',
-                    icon: Icons.edit_outlined,
-                  ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              // 📍 LOCATION
+              TextField(
+                controller: _locationController,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration(
+                  hint: 'Ubicación',
+                  icon: Icons.location_on_outlined,
                 ),
-                SizedBox(height: 16.h),
-                TextField(
-                  controller: _locationController,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
-                  ),
-                  decoration: _inputDecoration(
-                    label: 'Ubicación',
-                    hint: 'Agrega una ubicación',
-                    icon: Icons.location_on_outlined,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52.h,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _saveChanges,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: AppColors.primary,
-                      disabledBackgroundColor:
-                          AppColors.primary.withOpacity(0.55),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
+              ),
+
+              SizedBox(height: 24.h),
+
+              // 🔘 BOTÓN
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton(
+                  onPressed: _loading ? null : _saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: const Color(0xFF5B5CFF),
+                    disabledBackgroundColor:
+                        const Color(0xFF5B5CFF).withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
-                    child: _loading
-                        ? SizedBox(
-                            width: 22.w,
-                            height: 22.h,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2.4,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            'Guardar cambios',
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
                   ),
+                  child: _loading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : Text(
+                          'Guardar cambios',
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

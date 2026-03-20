@@ -40,11 +40,11 @@ class WelcomeScreen extends StatelessWidget {
           ),
           SizedBox(height: 220.h),
           AuthButton(
-            text: 'Sign In',
+            text: 'Iniciar Seccion',
             onTap: onLogin,
           ),
           AuthButton(
-            text: 'Sign Up',
+            text: 'Registrarase',
             onTap: onSignup,
             outlined: true,
           ),

@@ -3,7 +3,6 @@ import 'package:app/screen/add_screen.dart';
 import 'package:app/screen/home.dart';
 import 'package:app/screen/profile_screen.dart';
 import 'package:app/screen/search_screen.dart';
-import 'package:app/screen/notifications_screen.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -20,7 +19,6 @@ class _NavigationScreenState extends State<NavigationScreen> {
     HomeScreen(),
     SearchScreen(),
     AddScreen(),
-    NotificationsScreen(),
     ProfileScreen(),
   ];
 
@@ -71,11 +69,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: _itemColor(index),
-                size: 24,
-              ),
+              Icon(icon, color: _itemColor(index), size: 24),
               const SizedBox(height: 4),
               Text(
                 label,
@@ -105,10 +99,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF5B5CFF),
-              Color(0xFF8B6BFF),
-            ],
+            colors: [Color(0xFF5B5CFF), Color(0xFF8B6BFF)],
           ),
           boxShadow: [
             BoxShadow(
@@ -123,11 +114,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                 : Colors.white.withOpacity(0.10),
           ),
         ),
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
     );
   }
@@ -142,9 +129,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF090D21),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.06),
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.06)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.25),
@@ -155,26 +140,9 @@ class _NavigationScreenState extends State<NavigationScreen> {
         ),
         child: Row(
           children: [
-            _buildNavItem(
-              index: 0,
-              icon: Icons.home_outlined,
-              label: 'Inicio',
-            ),
-            _buildNavItem(
-              index: 1,
-              icon: Icons.search,
-              label: 'Explorar',
-            ),
-            Expanded(
-              child: Center(
-                child: _buildCenterAddButton(),
-              ),
-            ),
-            _buildNavItem(
-              index: 3,
-              icon: Icons.notifications_none,
-              label: 'Avisos',
-            ),
+            _buildNavItem(index: 0, icon: Icons.home_outlined, label: 'Inicio'),
+            _buildNavItem(index: 1, icon: Icons.search, label: 'Explorar'),
+            Expanded(child: Center(child: _buildCenterAddButton())),
             _buildNavItem(
               index: 4,
               icon: Icons.person_outline,

@@ -332,7 +332,7 @@ class _SearchScreenState extends State<SearchScreen> {
           SizedBox(height: 10.h),
           Expanded(
             child: ListView(
-              padding: EdgeInsets.only(bottom: 20.h),
+              padding: EdgeInsets.only(bottom: 120.h),
               children: [
                 if (showUsers) ...[
                   _buildSectionTitle('USUARIOS'),

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:app/data/firebase_service/firestor.dart';
 import 'package:app/screen/addpost_text.dart';
-import 'package:app/screen/notifications_screen.dart';
 import 'package:app/screen/post_detail_screen.dart';
 import 'package:app/screen/profile_screen.dart';
 import 'package:app/util/time_format.dart';
@@ -15,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:app/screen/edit_post_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,10 +22,10 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> _uploadedImages = [];
   StreamSubscription<String>? _uploadSub;
+  Set<String> followingLocal = {};
 
   @override
   void initState() {
@@ -115,17 +115,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _openEditPost({
-    required String postId,
-    required String caption,
-    required String location,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('La pantalla para editar post aún no está lista'),
+void _openEditPost({
+  required String postId,
+  required String caption,
+  required String location,
+}) async {
+  final result = await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => EditPostScreen(
+        postId: postId,
+        initialCaption: caption,
+        initialLocation: location,
       ),
-    );
+    ),
+  );
+
+  if (result == true && mounted) {
+    setState(() {}); // 👈 refresca Home automáticamente
   }
+}
 
   void _showCommentBottomSheet(BuildContext context, String postId) {
     final TextEditingController commentController = TextEditingController();
@@ -618,31 +626,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _topActionButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44.w,
-        height: 44.h,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withOpacity(0.06),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.10),
-          ),
-        ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 21.sp,
-        ),
-      ),
-    );
-  }
-
   Widget _buildSectionTitle(String text) {
     return Padding(
       padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 8.h),
@@ -863,56 +846,62 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  if (!isOwnPost && postUid.isNotEmpty)
-                    FutureBuilder<bool>(
-                      future: FirebaseFirestor().isFollowingUser(postUid),
-                      builder: (context, snapshot) {
-                        final isFollowing = snapshot.data ?? false;
+if (!isOwnPost && postUid.isNotEmpty)
+  StreamBuilder<bool>(
+    key: ValueKey(postUid),
+    stream: FirebaseFirestor().isFollowingUserStream(postUid),
+    builder: (context, snapshot) {
+      final isLoading =
+          snapshot.connectionState == ConnectionState.waiting;
+      final isFollowing = followingLocal.contains(postUid) || (snapshot.data ?? false);
 
-                        return Container(
-                          height: 34.h,
-                          margin: EdgeInsets.only(right: 6.w),
-                          child: OutlinedButton(
-                            onPressed: () async {
-                              try {
-                                if (isFollowing) {
-                                  await FirebaseFirestor()
-                                      .unfollowUser(targetUid: postUid);
-                                } else {
-                                  await FirebaseFirestor()
-                                      .followUser(targetUid: postUid);
-                                }
-                                if (mounted) setState(() {});
-                              } catch (e) {
-                                _showErrorMessage(
-                                  e,
-                                  fallback:
-                                      'Error al actualizar seguimiento',
-                                );
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color:
-                                    const Color(0xFF4E63FF).withOpacity(0.75),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18.r),
-                              ),
-                              padding: EdgeInsets.symmetric(horizontal: 16.w),
-                            ),
-                            child: Text(
-                              isFollowing ? 'Siguiendo' : 'Seguir',
-                              style: TextStyle(
-                                color: const Color(0xFF7B8CFF),
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+      return Container(
+        height: 34.h,
+        margin: EdgeInsets.only(right: 6.w),
+        child: OutlinedButton(
+          onPressed: isLoading
+              ? null
+              : () async {
+                  try {
+                    setState(() {
+                      if (isFollowing) {
+                        followingLocal.remove(postUid);
+                      } else {
+                        followingLocal.add(postUid);
+                      }
+                    });
+
+                    if (isFollowing) {
+                      await FirebaseFirestor().unfollowUser(targetUid: postUid);
+                    } else {
+                      await FirebaseFirestor().followUser(targetUid: postUid);
+                    }
+                  } catch (e) {}
+                },
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(
+              color: const Color(0xFF4E63FF).withOpacity(0.75),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18.r),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+          ),
+          child: Text(
+            isLoading
+                ? '...'
+                : (isFollowing ? 'Siguiendo' : 'Seguir'),
+            style: TextStyle(
+              color: const Color(0xFF7B8CFF),
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      );
+    },
+  ),
+
                   PopupMenuButton<String>(
                     color: const Color(0xFF202744),
                     elevation: 12,
@@ -1064,33 +1053,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white,
                     ),
                   ),
-                  const Spacer(),
-                  StreamBuilder<bool>(
-                    stream: FirebaseFirestor().isPostSaved(postId),
-                    builder: (context, snapshot) {
-                      final isSaved = snapshot.data ?? false;
-
-                      return IconButton(
-                        onPressed: () async {
-                          try {
-                            await FirebaseFirestor().toggleSavePost(
-                              postId: postId,
-                              postData: data,
-                            );
-                          } catch (e) {
-                            _showErrorMessage(
-                              e,
-                              fallback: 'Error al guardar publicación',
-                            );
-                          }
-                        },
-                        icon: Icon(
-                          isSaved ? Icons.bookmark : Icons.bookmark_border,
-                          color: Colors.white,
-                        ),
-                      );
-                    },
-                  ),
                 ],
               ),
             ),
@@ -1219,7 +1181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(height: 8.h),
                             Text(
-                              'Tu historia',
+                              'Publicar',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -1328,22 +1290,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                   ),
                 ),
-                const Spacer(),
-                _topActionButton(
-                  icon: Icons.notifications_none,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const NotificationsScreen(),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: 10.w),
-                _topActionButton(
-                  icon: Icons.favorite_border,
-                  onTap: () {},
-                ),
               ],
             ),
           ),
@@ -1358,7 +1304,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (_uploadedImages.isNotEmpty) _buildPendingUploadedImages(),
             _buildPostsSection(),
             SliverToBoxAdapter(
-              child: SizedBox(height: 14.h),
+              child: SizedBox(height: 120.h),
             ),
           ],
         ),

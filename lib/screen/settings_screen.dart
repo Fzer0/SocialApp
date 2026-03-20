@@ -1,9 +1,10 @@
+import 'package:app/data/firebase_service/firestor.dart';
 import 'package:app/data/model/usermodel.dart';
 import 'package:app/screen/edit_profile_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:app/screen/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsScreen extends StatelessWidget {
   final Usermodel user;
@@ -101,33 +102,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _showInfoDialog(
-    BuildContext context, {
-    required String title,
-    required String message,
-  }) async {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF11162B),
-        title: Text(
-          title,
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _showLogoutDialog(BuildContext context) async {
     showDialog(
       context: context,
@@ -150,6 +124,16 @@ class SettingsScreen extends StatelessWidget {
             onPressed: () async {
               Navigator.pop(context);
               await FirebaseAuth.instance.signOut();
+
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (_) => WelcomeScreen(
+                    onLogin: () {},
+                    onSignup: () {},
+                  ),
+                ),
+                (route) => false,
+              );
             },
             child: const Text(
               'Salir',
@@ -184,15 +168,17 @@ class SettingsScreen extends StatelessWidget {
               Navigator.pop(context);
 
               try {
-                final currentUser = FirebaseAuth.instance.currentUser;
-                if (currentUser == null) return;
+                await FirebaseFirestor().deleteAccount();
 
-                await FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(currentUser.uid)
-                    .delete();
-
-                await currentUser.delete();
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => WelcomeScreen(
+                      onLogin: () {},
+                      onSignup: () {},
+                    ),
+                  ),
+                  (route) => false,
+                );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -244,32 +230,6 @@ class SettingsScreen extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => EditProfileScreen(user: user),
                   ),
-                );
-              },
-            ),
-            SizedBox(height: 6.h),
-            _sectionTitle('AYUDA'),
-            _tile(
-              icon: Icons.help_outline,
-              title: 'Ayuda',
-              subtitle: 'Información básica de la app',
-              onTap: () {
-                _showInfoDialog(
-                  context,
-                  title: 'Ayuda',
-                  message: 'Aquí luego podemos poner soporte o preguntas frecuentes.',
-                );
-              },
-            ),
-            _tile(
-              icon: Icons.info_outline,
-              title: 'Acerca de la app',
-              subtitle: 'Versión 1.0.0',
-              onTap: () {
-                _showInfoDialog(
-                  context,
-                  title: 'Acerca de la app',
-                  message: 'Mingle / Social App\nVersión 1.0.0',
                 );
               },
             ),

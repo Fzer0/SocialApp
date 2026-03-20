@@ -288,6 +288,31 @@ class FirebaseFirestor {
       throw AppException(e.toString());
     }
   }
+  Future<void> deleteAccount() async {
+  final currentUser = _auth.currentUser;
+  if (currentUser == null) return;
+
+  final uid = currentUser.uid;
+
+  // eliminar posts
+  final posts = await _firebaseFirestore
+      .collection('posts')
+      .where('uid', isEqualTo: uid)
+      .get();
+
+  for (var doc in posts.docs) {
+    await doc.reference.delete();
+  }
+
+  // eliminar usuario
+  await _firebaseFirestore
+      .collection('users')
+      .doc(uid)
+      .delete();
+
+  // eliminar auth
+  await currentUser.delete();
+}
 
   Future<void> updatePost({
     required String postId,
@@ -566,6 +591,25 @@ class FirebaseFirestor {
     final followers = List.from(data['followers'] ?? []);
     return followers.contains(currentUid);
   }
+  Stream<bool> isFollowingUserStream(String targetUid) {
+  final currentUid = _auth.currentUser?.uid;
+
+  if (currentUid == null || targetUid.isEmpty) {
+    return Stream.value(false);
+  }
+
+  return _firebaseFirestore
+      .collection('users')
+      .doc(targetUid)
+      .snapshots()
+      .map((doc) {
+    final data = doc.data();
+    if (data == null) return false;
+
+    final followers = List<String>.from(data['followers'] ?? []);
+    return followers.contains(currentUid);
+  });
+}
 
   Stream<QuerySnapshot> getNotifications() {
     final uid = _auth.currentUser?.uid;
