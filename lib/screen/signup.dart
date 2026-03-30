@@ -128,7 +128,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           SizedBox(height: 14.h),
           Text(
-            'Create New Account',
+            'Crear Nueva Cuenta',
             style: TextStyle(
               color: Colors.white,
               fontSize: 26.sp,
@@ -138,23 +138,23 @@ class _SignupScreenState extends State<SignupScreen> {
           SizedBox(height: 24.h),
           AuthInput(
             controller: username,
-            hint: 'Username',
+            hint: 'Usuario',
             icon: Icons.person_outline,
           ),
           AuthInput(
             controller: email,
-            hint: 'Email address',
+            hint: 'Correo electronico',
             icon: Icons.mail_outline,
             keyboardType: TextInputType.emailAddress,
           ),
           AuthInput(
             controller: bio,
-            hint: 'Bio',
+            hint: 'Biografia',
             icon: Icons.edit_note,
           ),
           AuthInput(
             controller: password,
-            hint: 'Password',
+            hint: 'Contraseña',
             icon: Icons.lock_outline,
             obscureText: _obscure1,
             suffixIcon: IconButton(
@@ -171,7 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           AuthInput(
             controller: passwordConfirme,
-            hint: 'Confirm Password',
+            hint: 'Confirmar contraseña',
             icon: Icons.lock_outline,
             obscureText: _obscure2,
             suffixIcon: IconButton(
@@ -188,7 +188,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           SizedBox(height: 8.h),
           AuthButton(
-            text: 'Sign Up',
+            text: 'Registrarse',
             onTap: _signup,
             loading: _loading,
           ),
@@ -196,7 +196,7 @@ class _SignupScreenState extends State<SignupScreen> {
           GestureDetector(
             onTap: widget.showLogin,
             child: Text(
-              '¿Ya tienes cuenta? Log In',
+              '¿Ya tienes cuenta? Acceso',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14.sp,

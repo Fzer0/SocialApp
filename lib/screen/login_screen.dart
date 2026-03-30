@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           SizedBox(height: 18.h),
           Text(
-            'Welcome back!',
+            'Bienvenido a Mingle',
             style: TextStyle(
               color: Colors.white,
               fontSize: 28.sp,
@@ -143,13 +143,13 @@ class _LoginScreenState extends State<LoginScreen> {
           SizedBox(height: 28.h),
           AuthInput(
             controller: email,
-            hint: 'Username or Email address',
+            hint: 'Usuario o Correo',
             icon: Icons.person_outline,
             keyboardType: TextInputType.emailAddress,
           ),
           AuthInput(
             controller: password,
-            hint: 'Password',
+            hint: 'Contraseña',
             icon: Icons.lock_outline,
             obscureText: _obscure,
             suffixIcon: IconButton(
@@ -166,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           SizedBox(height: 8.h),
           AuthButton(
-            text: 'Log In',
+            text: 'Acceder',
             onTap: _login,
             loading: _loading,
           ),
@@ -186,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
           GestureDetector(
             onTap: widget.showSignup,
             child: Text(
-              '¿No tienes cuenta? Sign Up',
+              '¿No tienes cuenta? Registrate',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14.sp,
