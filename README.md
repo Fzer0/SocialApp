@@ -4,15 +4,15 @@ Aplicacion de una red social en flutter
 
 ## 📸 Mingle
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/c51ba76d-b4c3-4853-ae1c-966eafb968dc" width="200" alt="Descripción de la Imagen 1"/>
-  <img src="https://github.com/user-attachments/assets/2c85c539-ade1-41db-b4eb-da4f0b60ea51" width="200" alt="Descripción de la Imagen 2"/>
-  <img src="https://github.com/user-attachments/assets/099b8e21-56ce-41d1-ad5c-d657f964b783" width="200" alt="Descripción de la Imagen 3"/>
+  <img src="https://github.com/user-attachments/assets/06fd33a6-14cc-4e22-babd-77866c6df8d5" width="200" alt="Descripción de la Imagen 1"/>
+  <img src="https://github.com/user-attachments/assets/b8dc65e6-391e-4a25-b9f8-7e49929f5bc3" width="200" alt="Descripción de la Imagen 2"/>
+  <img src="https://github.com/user-attachments/assets/479e2ef0-5b0d-4758-abe1-14a6c654aef4" width="200" alt="Descripción de la Imagen 3"/>
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f4a912a0-fa12-4064-bc0b-b68962797d6b" width="200" alt="Descripción de la Imagen 4"/>
-  <img src="https://github.com/user-attachments/assets/382419f2-0b67-4938-b343-85e274c99b01" width="200" alt="Descripción de la Imagen 5"/>
-  <img src="https://github.com/user-attachments/assets/2c263301-17cd-4888-a8dd-f16725787661" width="200" alt="Descripción de la Imagen 6"/>
+  <img src="https://github.com/user-attachments/assets/24222b60-d563-41d2-8b0a-f8152e49d687" width="200" alt="Descripción de la Imagen 4"/>
+  <img src="https://github.com/user-attachments/assets/b20255c4-c65b-48dd-9310-86e4d5e746f8" width="200" alt="Descripción de la Imagen 5"/>
+  <img src="https://github.com/user-attachments/assets/7197fa46-fac3-47cb-a963-570cddea89b4" width="200" alt="Descripción de la Imagen 6"/>
 </p>
 
 
